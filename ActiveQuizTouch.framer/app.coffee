@@ -4,15 +4,27 @@ questionScrollComponent = new ScrollComponent
 	width: Screen.width
 	height: Screen.height
 
-for questionNumber in [0..5]
-	questionNumberHeight = 100
-	questionNumberSpacing = 50
-	new Layer
+selectedQuestion = null
+questionNumberHeight = 100
+questionNumberSpacing = 50
+
+createQuestion = ->
+	question = new Layer
 		parent: questionScrollComponent.content
 		backgroundColor: "white"
 		width: Screen.width
 		height: questionNumberHeight
-		y: questionNumber * (questionNumberHeight + questionNumberSpacing)
+	question.setSelected = (selected) ->
+		question.backgroundColor = if selected then "blue" else "white"
+	question.onTap ->
+		selectedQuestion.setSelected false if selectedQuestion
+		selectedQuestion = question
+		question.setSelected true
+	return question	
+
+for questionNumber in [0..5]
+	question = createQuestion()
+	question.y = questionNumber * (questionNumberHeight + questionNumberSpacing)
 	
 #==========================================
 # Answer Input
