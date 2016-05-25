@@ -8,6 +8,9 @@ selectedQuestion = null
 questionNumberHeight = 100
 questionNumberSpacing = 50
 
+#==========================================
+# Question Cells
+
 createQuestion = ->
 	question = new Layer
 		parent: questionScrollComponent.content
@@ -16,39 +19,49 @@ createQuestion = ->
 		height: questionNumberHeight
 	question.setSelected = (selected) ->
 		question.backgroundColor = if selected then "blue" else "white"
+		question.answerLayer.text = "" if not selected
 	question.onTap ->
 		selectedQuestion.setSelected false if selectedQuestion
 		selectedQuestion = question
 		question.setSelected true
+		
+		question.updatePendingNumber
+			number: 0
+			sign: 1
+		
+	question.answerLayer = new TextLayer
+		x: 400
+		width: 304
+		height: questionNumberHeight
+		fontSize: 48
+		color: "red"
+		backgroundColor: "yellow"
+		parent: question
+		text: ""
+		
+	question.answerBuffer =
+		number: null
+		sign: 1
+		
+	question.updatePendingNumber = (newAnswerBuffer) ->
+		question.answerBuffer = newAnswerBuffer
+		if newAnswerBuffer.number == 0
+			question.answerLayer.text = if newAnswerBuffer.sign == 1 then "" else "-"
+		else
+			question.answerLayer.text = newAnswerBuffer.number * newAnswerBuffer.sign
+
+		
 	return question	
 
 for questionNumber in [0..5]
 	question = createQuestion()
 	question.y = questionNumber * (questionNumberHeight + questionNumberSpacing)
-	
+
 #==========================================
 # Answer Input
 
-answerBuffer =
-	number: null
-	sign: 1
-answerLayer = new TextLayer
-	x: 65
-	y: 86
-	width: 604
-	height: 93
-	fontSize: 48
-	color: "red"
-	backgroundColor: "yellow"
-updatePendingNumber = (newAnswerBuffer) ->
-	answerBuffer = newAnswerBuffer
-	if newAnswerBuffer.number == 0
-		answerLayer.text = if newAnswerBuffer.sign == 1 then "" else "-"
-	else
-		answerLayer.text = newAnswerBuffer.number * newAnswerBuffer.sign
-updatePendingNumber
-	number: 0
-	sign: 1
+updatePendingNumber = (updateFunction) ->
+	selectedQuestion.updatePendingNumber updateFunction(selectedQuestion.answerBuffer)
 
 #==========================================
 # Keyboard
@@ -65,7 +78,7 @@ keyHeight = keyboardHeight / 4
 keySpacing = 2
 
 appendDigit = (digit) ->
-	updatePendingNumber
+	updatePendingNumber (answerBuffer) ->
 		number: answerBuffer.number * 10 + digit
 		sign: answerBuffer.sign
 		
@@ -111,18 +124,18 @@ for column in [0..3]
 			keyLabel.text = "bspace"
 			key.onTouchEnd (event, layer) ->
 				if answerBuffer.number > 0
-					updatePendingNumber
+					updatePendingNumber (answerBuffer) ->
 						number: Math.trunc(answerBuffer.number / 10)
 						sign: answerBuffer.sign
 				else
 					# If there's no number, just remove the negative.
-					updatePendingNumber { number: 0, sign: 1 }
+					updatePendingNumber -> { number: 0, sign: 1 }
 				unhighlight event, layer
 		else if column == 3 && row == 1
 			# Plus/minus
 			keyLabel.text = "+/–"
 			key.onTouchEnd (event, layer) ->
-				updatePendingNumber
+				updatePendingNumber (answerBuffer) ->
 					number: answerBuffer.number
 					sign: answerBuffer.sign * -1
 				unhighlight event, layer
