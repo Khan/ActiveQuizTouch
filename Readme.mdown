@@ -1,0 +1,3 @@
+Early experiments exploring and elaborating on [Jenova Chen's "Active Quiz for Math"](http://jenovachen.com/flowingames/implementations/math/index.htm) and [its ideas](http://www.jenovachen.com/flowingames/thesis.htm) on agency, "flow," and dynamic difficulty adjustment in a learning activity. This one's a rote arithmetic automaticity practice exercise, but we'd like to understand these mechanics so we can apply them to richer activities. We're starting by taking the game apart and putting it back together.
+
+This prototype is built with [Framer](http://framerjs.com).
