@@ -123,13 +123,13 @@ for column in [0..3]
 			# Backspace
 			keyLabel.text = "bspace"
 			key.onTouchEnd (event, layer) ->
-				if answerBuffer.number > 0
-					updatePendingNumber (answerBuffer) ->
+				updatePendingNumber (answerBuffer) ->
+					if answerBuffer.number > 0
 						number: Math.trunc(answerBuffer.number / 10)
 						sign: answerBuffer.sign
-				else
-					# If there's no number, just remove the negative.
-					updatePendingNumber -> { number: 0, sign: 1 }
+					else
+						# If there's no number, just remove the negative.
+						{ number: 0, sign: 1 }
 				unhighlight event, layer
 		else if column == 3 && row == 1
 			# Plus/minus
