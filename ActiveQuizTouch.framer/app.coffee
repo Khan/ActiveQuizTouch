@@ -3,6 +3,9 @@
 points = 0
 currentLevel = 4
 
+#==========================================
+# Points
+
 pointsDisplay = new TextLayer
 	color: "white"
 	fontSize: 40
@@ -12,6 +15,32 @@ updatePoints = (newPoints) ->
 	pointsDisplay.text = "Points: " + newPoints
 	points = newPoints
 updatePoints(0)
+
+#==========================================
+# Timer
+
+endTime = performance.now() + 60000
+lastTimeUpdate = 0
+
+timeDisplay = new TextLayer
+	color: "white"
+	fontSize: 40
+	width: 300
+	x: Screen.width - 330
+	y: 30
+	textAlign: "right"
+	text: "Remaining: 3s"
+	
+updateTimer = (timestamp) ->
+	newTime = Math.ceil((endTime - timestamp) / 1000)
+	if newTime != lastTimeUpdate
+		lastTimeUpdate = newTime
+		timeDisplay.text = "Remaining: " + newTime + "s"
+	requestAnimationFrame updateTimer
+requestAnimationFrame updateTimer
+
+addTime = (extraSeconds) ->
+	endTime += extraSeconds * 1000
 
 #==========================================
 # Problem Generation
@@ -130,7 +159,7 @@ createQuestion = ->
 				when "points"
 					updatePoints(points + question.problem.reward.count)
 				when "time"
-					print "Awarding time: " + question.problem.reward.count
+					addTime(question.problem.reward.count)
 			
 			question.setSelected(false)
 		else
