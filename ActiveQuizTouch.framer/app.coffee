@@ -1,9 +1,20 @@
 {TextLayer} = require 'TextLayer'
 
+points = 0
+currentLevel = 4
+
+pointsDisplay = new TextLayer
+	color: "white"
+	fontSize: 40
+	x: 30
+	y: 30
+updatePoints = (newPoints) ->
+	pointsDisplay.text = "Points: " + newPoints
+	points = newPoints
+updatePoints(0)
+
 #==========================================
 # Problem Generation
-
-currentLevel = 4
 
 operators = [
 	{label: "+", operation: (a, b) -> a + b}
@@ -27,20 +38,23 @@ generateProblem = (difficulty, level) ->
 	
 	label: label
 	answer: eval(label) # "cleverly" avoiding implementing order-of-operations
-	rewards:
+	reward:
 		count: (difficulty - level) + 1
-		type: if Math.random(1) > 0.33 then "point" else "time"
+		type: if Math.random(1) > 0.33 then "points" else "time"
 
 #==========================================
 # Game "board"
 
 questionScrollComponent = new ScrollComponent
+	y: 60
 	width: Screen.width
-	height: Screen.height
+	height: Screen.height - 60
+	contentInset:
+		top: 60
 
 selectedQuestion = null
-questionNumberHeight = 100
-questionNumberSpacing = 50
+questionNumberHeight = 80
+questionNumberSpacing = 20
 
 #==========================================
 # Question Cells
@@ -63,7 +77,7 @@ createQuestion = ->
 			number: null
 			sign: 1
 			
-	question.problem = generateProblem(currentLevel + Utils.randomChoice([-1, 0, 1]))
+	question.problem = generateProblem(currentLevel + Utils.randomChoice([0, 1, 2]), currentLevel)
 			
 	questionPrompt = new TextLayer
 		x: 30
@@ -100,6 +114,12 @@ createQuestion = ->
 		userAnswer = question.answerBuffer.number * question.answerBuffer.sign
 		isCorrect = userAnswer == question.problem.answer
 		if isCorrect
+			switch question.problem.reward.type
+				when "points"
+					updatePoints(points + question.problem.reward.count)
+				when "time"
+					print "Awarding time: " + question.problem.reward.count
+			
 			question.backgroundColor = "green"
 		else
 			oldColor = question.backgroundColor
