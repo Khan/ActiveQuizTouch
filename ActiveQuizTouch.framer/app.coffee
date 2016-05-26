@@ -9,6 +9,35 @@ questionNumberHeight = 100
 questionNumberSpacing = 50
 
 #==========================================
+# Problem Generation
+
+operators = [
+	{label: "+", operation: (a, b) -> a + b}
+	{label: "-", operation: (a, b) -> a - b}
+	{label: "*", operation: (a, b) -> a * b}
+]
+
+generateProblem = (difficulty, level) ->
+	maxOperatorIndex = Math.floor(Math.min(difficulty / 2, 2))
+	numberOfOperators = (Math.floor(difficulty / 2) % 3) + 1
+	maxOperandValue = (Math.floor(difficulty / 6) * 10) + 10
+	numberOfOperands = numberOfOperators + 1
+	numbers = [0..numberOfOperands].map -> Math.floor(Utils.randomNumber(0, maxOperandValue))
+	operators = [0..numberOfOperators].map -> Utils.randomChoice(operators[0..maxOperatorIndex])
+	
+	label = ""
+	answer = 0
+	for operatorIndex in [0..(numberOfOperators - 1)]
+		label += numbers[operatorIndex] + " " + operators[operatorIndex].label + " "
+	label += numbers[numberOfOperators]
+	
+	label: label
+	answer: eval(label) # "cleverly" avoiding implementing order-of-operations
+	rewards:
+		count: (difficulty - level) + 1
+		type: if Math.random(1) > 0.33 then "point" else "time"
+
+#==========================================
 # Question Cells
 
 createQuestion = ->
