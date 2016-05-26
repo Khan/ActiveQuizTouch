@@ -1,13 +1,5 @@
 {TextLayer} = require 'TextLayer'
 
-questionScrollComponent = new ScrollComponent
-	width: Screen.width
-	height: Screen.height
-
-selectedQuestion = null
-questionNumberHeight = 100
-questionNumberSpacing = 50
-
 #==========================================
 # Problem Generation
 
@@ -36,6 +28,17 @@ generateProblem = (difficulty, level) ->
 	rewards:
 		count: (difficulty - level) + 1
 		type: if Math.random(1) > 0.33 then "point" else "time"
+
+#==========================================
+# Game "board"
+
+questionScrollComponent = new ScrollComponent
+	width: Screen.width
+	height: Screen.height
+
+selectedQuestion = null
+questionNumberHeight = 100
+questionNumberSpacing = 50
 
 #==========================================
 # Question Cells
