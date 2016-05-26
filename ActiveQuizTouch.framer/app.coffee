@@ -94,6 +94,18 @@ createQuestion = ->
 		else
 			question.answerLayer.text = newAnswerBuffer.number * newAnswerBuffer.sign
 
+	question.submit = ->
+		userAnswer = question.answerBuffer.number * question.answerBuffer.sign
+		isCorrect = userAnswer == question.problem.answer
+		if isCorrect
+			question.backgroundColor = "green"
+		else
+			oldColor = question.backgroundColor
+			question.backgroundColor = "red"
+			question.animate
+				properties:
+					backgroundColor: oldColor
+				time: 0.5
 		
 	return question	
 
@@ -188,7 +200,7 @@ for column in [0..3]
 			keyLabel.text = "Submit"
 			key.height = keyHeight * 2 - keySpacing
 			key.onTouchEnd (event, layer) ->
-				# TODO
+				selectedQuestion.submit()
 				unhighlight event, layer
 		else if column == 0 && row == 3
 			# Extra-wide zero key
