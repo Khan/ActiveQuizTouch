@@ -78,6 +78,7 @@ questionScrollComponent = new ScrollComponent
 	y: 60
 	width: Screen.width
 	height: Screen.height - 60
+	scrollHorizontal: false
 	contentInset:
 		top: 60
 
