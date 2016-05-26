@@ -60,7 +60,7 @@ createQuestion = ->
 		question.setSelected true
 		
 		question.updatePendingNumber
-			number: 0
+			number: null
 			sign: 1
 			
 	question.problem = generateProblem(currentLevel + Utils.randomChoice([-1, 0, 1]))
@@ -90,6 +90,8 @@ createQuestion = ->
 	question.updatePendingNumber = (newAnswerBuffer) ->
 		question.answerBuffer = newAnswerBuffer
 		if newAnswerBuffer.number == 0
+			question.answerLayer.text = if newAnswerBuffer.sign == 1 then "0" else "-0"
+		else if newAnswerBuffer.number == null
 			question.answerLayer.text = if newAnswerBuffer.sign == 1 then "" else "-"
 		else
 			question.answerLayer.text = newAnswerBuffer.number * newAnswerBuffer.sign
@@ -181,11 +183,17 @@ for column in [0..3]
 			key.onTouchEnd (event, layer) ->
 				updatePendingNumber (answerBuffer) ->
 					if answerBuffer.number > 0
-						number: Math.trunc(answerBuffer.number / 10)
+						newNumber = Math.trunc(answerBuffer.number / 10)
+						
+						# If we'd be going from e.g. "9" to "0", go to a blank field instead.
+						number: if newNumber > 0 then newNumber else null
 						sign: answerBuffer.sign
+					else if answerBuffer.number == 0
+						# There's an explicitly-typed zero, which we'll now remove (but we'll leave a negative sign if there is one).
+						{ number: null, sign: answerBuffer.sign }
 					else
 						# If there's no number, just remove the negative.
-						{ number: 0, sign: 1 }
+						{ number: null, sign: 1 }
 				unhighlight event, layer
 		else if column == 3 && row == 1
 			# Plus/minus
