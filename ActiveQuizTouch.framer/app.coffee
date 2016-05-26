@@ -66,9 +66,16 @@ createQuestion = ->
 		width: Screen.width
 		height: questionNumberHeight
 	question.setSelected = (selected) ->
-		question.backgroundColor = if selected then "blue" else "white"
-		question.answerLayer.text = "" if not selected
+		question.backgroundColor = if question.isAnswered
+			"green"
+		else if selected
+			"blue"
+		else
+			"white"
+		question.answerLayer.text = "" if not selected and not question.isAnswered
 	question.onTap ->
+		return if question.isAnswered
+		
 		selectedQuestion.setSelected false if selectedQuestion
 		selectedQuestion = question
 		question.setSelected true
@@ -78,6 +85,8 @@ createQuestion = ->
 			sign: 1
 			
 	question.problem = generateProblem(currentLevel + Utils.randomChoice([0, 1, 2]), currentLevel)
+	
+	question.isAnswered = false
 			
 	questionPrompt = new TextLayer
 		x: 30
@@ -111,16 +120,19 @@ createQuestion = ->
 			question.answerLayer.text = newAnswerBuffer.number * newAnswerBuffer.sign
 
 	question.submit = ->
+		return if question.isAnswered
+		
 		userAnswer = question.answerBuffer.number * question.answerBuffer.sign
 		isCorrect = userAnswer == question.problem.answer
 		if isCorrect
+			question.isAnswered = true
 			switch question.problem.reward.type
 				when "points"
 					updatePoints(points + question.problem.reward.count)
 				when "time"
 					print "Awarding time: " + question.problem.reward.count
 			
-			question.backgroundColor = "green"
+			question.setSelected(false)
 		else
 			oldColor = question.backgroundColor
 			question.backgroundColor = "red"
