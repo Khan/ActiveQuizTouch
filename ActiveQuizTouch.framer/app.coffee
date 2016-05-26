@@ -3,6 +3,8 @@
 #==========================================
 # Problem Generation
 
+currentLevel = 4
+
 operators = [
 	{label: "+", operation: (a, b) -> a + b}
 	{label: "-", operation: (a, b) -> a - b}
@@ -60,6 +62,16 @@ createQuestion = ->
 		question.updatePendingNumber
 			number: 0
 			sign: 1
+			
+	question.problem = generateProblem(currentLevel + Utils.randomChoice([-1, 0, 1]))
+			
+	questionPrompt = new TextLayer
+		x: 30
+		autoSize: true
+		fontSize: 48
+		color: "black"
+		parent: question
+		text: question.problem.label
 		
 	question.answerLayer = new TextLayer
 		x: 400
