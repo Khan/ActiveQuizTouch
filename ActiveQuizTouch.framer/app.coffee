@@ -90,11 +90,19 @@ questionNumberSpacing = 20
 
 questions = []
 
-addQuestion = (newQuestion) ->
+addQuestion = (newQuestion, animate) ->
 	questions.unshift(newQuestion)
 	
 	for questionIndex in [0..(questions.length - 1)]
-		questions[questionIndex].y = questionIndex * (questionNumberHeight + questionNumberSpacing)
+		y = questionIndex * (questionNumberHeight + questionNumberSpacing)
+		question = questions[questionIndex]
+		if animate
+			question.animate
+				properties:
+					y: y
+				time: 0.2
+		else
+			question.y = y
 
 #==========================================
 # Question Cells
@@ -174,7 +182,7 @@ createQuestion = (difficulty, level) ->
 			
 			question.setSelected false
 			
-			addQuestion createQuestion(difficulty, level) for [0...question.problem.questionsRevealed]
+			addQuestion createQuestion(difficulty, level), true for [0...question.problem.questionsRevealed]
 		else
 			oldColor = question.backgroundColor
 			question.backgroundColor = "red"
