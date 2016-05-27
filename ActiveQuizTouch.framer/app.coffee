@@ -72,21 +72,6 @@ generateProblem = (difficulty, level) ->
 		type: if Math.random(1) > 0.33 then "points" else "time"
 
 #==========================================
-# Game "board"
-
-questionScrollComponent = new ScrollComponent
-	y: 60
-	width: Screen.width
-	height: Screen.height - 60
-	scrollHorizontal: false
-	contentInset:
-		top: 60
-
-selectedQuestion = null
-questionNumberHeight = 80
-questionNumberSpacing = 20
-
-#==========================================
 # Question Cells
 
 createQuestion = ->
@@ -172,6 +157,21 @@ createQuestion = ->
 				time: 0.5
 		
 	return question	
+
+#==========================================
+# Game "board"
+
+questionScrollComponent = new ScrollComponent
+	y: 60
+	width: Screen.width
+	height: Screen.height - 60
+	scrollHorizontal: false
+	contentInset:
+		top: 60
+
+selectedQuestion = null
+questionNumberHeight = 80
+questionNumberSpacing = 20
 
 for questionNumber in [0..5]
 	question = createQuestion()
