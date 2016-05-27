@@ -7,7 +7,7 @@
   "contentScale" : 1,
   "deviceType" : "apple-iphone-6s-silver",
   "selectedHand" : "",
-  "updateDelay" : -1,
+  "updateDelay" : 0.3,
   "deviceScale" : "fit",
   "codeFolds" : [
 

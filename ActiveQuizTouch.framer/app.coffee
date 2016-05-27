@@ -70,11 +70,36 @@ generateProblem = (difficulty, level) ->
 	reward:
 		count: (difficulty - level) + 1
 		type: if Math.random(1) > 0.33 then "points" else "time"
+	questionsRevealed: Utils.randomChoice([0, 0, 1, 1, 1, 2, 3])
+
+#==========================================
+# Game "board"
+
+questionScrollComponent = new ScrollComponent
+	y: 110
+	width: Screen.width
+	height: Screen.height - 110
+	scrollHorizontal: false
+	contentInset:
+		top: 0
+		bottom: keyboardHeight
+
+selectedQuestion = null
+questionNumberHeight = 80
+questionNumberSpacing = 20
+
+questions = []
+
+addQuestion = (newQuestion) ->
+	questions.unshift(newQuestion)
+	
+	for questionIndex in [0..(questions.length - 1)]
+		questions[questionIndex].y = questionIndex * (questionNumberHeight + questionNumberSpacing)
 
 #==========================================
 # Question Cells
 
-createQuestion = ->
+createQuestion = (difficulty, level) ->
 	question = new Layer
 		parent: questionScrollComponent.content
 		backgroundColor: "white"
@@ -99,7 +124,7 @@ createQuestion = ->
 			number: null
 			sign: 1
 			
-	question.problem = generateProblem(currentLevel + Utils.randomChoice([0, 1, 2]), currentLevel)
+	question.problem = generateProblem(difficulty, level)
 	
 	question.isAnswered = false
 			
@@ -143,11 +168,13 @@ createQuestion = ->
 			question.isAnswered = true
 			switch question.problem.reward.type
 				when "points"
-					updatePoints(points + question.problem.reward.count)
+					updatePoints points + question.problem.reward.count
 				when "time"
-					addTime(question.problem.reward.count)
+					addTime question.problem.reward.count
 			
-			question.setSelected(false)
+			question.setSelected false
+			
+			addQuestion createQuestion(difficulty, level) for [0...question.problem.questionsRevealed]
 		else
 			oldColor = question.backgroundColor
 			question.backgroundColor = "red"
@@ -159,23 +186,11 @@ createQuestion = ->
 	return question	
 
 #==========================================
-# Game "board"
-
-questionScrollComponent = new ScrollComponent
-	y: 60
-	width: Screen.width
-	height: Screen.height - 60
-	scrollHorizontal: false
-	contentInset:
-		top: 60
-
-selectedQuestion = null
-questionNumberHeight = 80
-questionNumberSpacing = 20
+# Game state
 
 for questionNumber in [0..5]
-	question = createQuestion()
-	question.y = questionNumber * (questionNumberHeight + questionNumberSpacing)
+	question = createQuestion(currentLevel + Utils.randomChoice([0, 1, 2]), currentLevel)
+	addQuestion(question)
 
 #==========================================
 # Answer Input
@@ -281,4 +296,5 @@ for column in [0..3]
 			key.width = keyWidth * 3 - keySpacing
 			
 		keyLabel.center()
-		
+
+questionScrollComponent.height -= keyboardHeight
