@@ -3,6 +3,14 @@
 points = 0
 currentLevel = 4
 
+# Color Palette
+medGray = "rgba(216,216,216,1)"
+lightGray = "rgba(227,229,230,1)"
+darkGray = "rgba(98,101,105,1)"
+correctColor = "rgba(116,207,112,1)"
+selectColor = "rgba(157,243,255,1)"
+
+
 #==========================================
 # Points
 
@@ -103,6 +111,7 @@ addQuestion = (newQuestion, animate) ->
 				properties:
 					y: y
 				time: 0.2
+				curve:"spring(400,15,5)"
 		else
 			question.y = y
 
@@ -116,12 +125,16 @@ createQuestion = (difficulty, level) ->
 		width: Screen.width
 		height: questionNumberHeight
 	question.setSelected = (selected) ->
-		question.backgroundColor = if question.isAnswered
-			"green"
+		
+		if question.isAnswered
+			question.backgroundColor = correctColor
 		else if selected
-			"blue"
+			question.backgroundColor = selectColor
+			question.answerLayer.backgroundColor = "yellow"
 		else
-			"white"
+			question.backgroundColor = "white"
+			question.answerLayer.backgroundColor = "white"
+		
 		question.answerLayer.text = "" if not selected and not question.isAnswered
 	question.onTap ->
 		return if question.isAnswered
@@ -133,6 +146,9 @@ createQuestion = (difficulty, level) ->
 		question.updatePendingNumber
 			number: null
 			sign: 1
+			
+		for questionNumber in [0...question.problem.questionsRevealed]
+				addQuestion createQuestion(difficulty, level), true
 			
 	question.problem = generateProblem(difficulty, level)
 	
@@ -152,7 +168,7 @@ createQuestion = (difficulty, level) ->
 		height: questionNumberHeight
 		fontSize: 48
 		color: "red"
-		backgroundColor: "yellow"
+		backgroundColor: "white"
 		parent: question
 		text: ""
 		
@@ -189,6 +205,7 @@ createQuestion = (difficulty, level) ->
 			
 			for questionNumber in [0...question.problem.questionsRevealed]
 				addQuestion createQuestion(difficulty, level), true
+				
 		else
 			oldColor = question.backgroundColor
 			question.backgroundColor = "red"
@@ -246,12 +263,12 @@ for column in [0..3]
 			parent: keyboard
 		key.states.add
 			highlight:
-				backgroundColor: "rgba(134,255,242,1)"
+				backgroundColor: selectColor
 			normal:
 				if column == 3
-					backgroundColor: "rgba(227,229,230,1)"
+					backgroundColor: lightGray
 				else 
-					backgroundColor: "rgba(216,216,216,1)"
+					backgroundColor: medGray
 		key.onTouchStart (event, layer) ->
 			layer.states.switch "highlight", time: 0.1, curve: "easeout"
 			
@@ -260,7 +277,7 @@ for column in [0..3]
 		key.states.switchInstant "normal"
 		
 		keyLabel = new TextLayer
-			color: "rgba(98,101,105,1)"
+			color: darkGray
 			parent: key
 			autoSize: true
 			fontSize: 48
