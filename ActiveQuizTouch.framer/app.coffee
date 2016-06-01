@@ -86,7 +86,19 @@ questionScrollComponent = new ScrollComponent
 		top: 0
 		bottom: keyboardHeight
 
+noSelectionKeyboardOverlay = null # Assigned later, in keyboard section. Annoying that Framer won't let you reference functions top-level variables that are defined later in the file.
+
 selectedQuestion = null
+setSelectedQuestion = (newSelectedQuestion) -> 
+	selectedQuestion?.setSelected false
+	selectedQuestion = newSelectedQuestion
+	newSelectedQuestion?.setSelected true
+	
+	noSelectionKeyboardOverlay.animate
+		properties:
+			opacity: if newSelectedQuestion then 0 else 1
+		time: 0.2
+
 questionNumberHeight = 80
 questionNumberSpacing = 20
 
@@ -125,11 +137,8 @@ createQuestion = (difficulty, level) ->
 		question.answerLayer.text = "" if not selected and not question.isAnswered
 	question.onTap ->
 		return if question.isAnswered
-		
-		selectedQuestion.setSelected false if selectedQuestion
-		selectedQuestion = question
-		question.setSelected true
-		
+			
+		setSelectedQuestion question	
 		question.updatePendingNumber
 			number: null
 			sign: 1
@@ -185,7 +194,7 @@ createQuestion = (difficulty, level) ->
 				when "time"
 					addTime question.problem.reward.count
 			
-			question.setSelected false
+			setSelectedQuestion null
 			
 			for questionNumber in [0...question.problem.questionsRevealed]
 				addQuestion createQuestion(difficulty, level), true
@@ -317,3 +326,19 @@ for column in [0..3]
 		keyLabel.center()
 
 questionScrollComponent.height -= keyboardHeight
+
+noSelectionKeyboardOverlay = new Layer
+	width: keyboard.width
+	height: keyboard.height
+	x: keyboard.x
+	y: keyboard.y
+	backgroundColor: "rgba(216,216,216,1)"
+newSelectionKeyboardOverlayLabel = new TextLayer
+	parent: noSelectionKeyboardOverlay
+	text: "Select a question"
+	autoSize: true
+	color: "black"
+	fontFamily: "Proxima Nova"
+	fontSize: 48
+newSelectionKeyboardOverlayLabel.midX = keyboard.midX
+newSelectionKeyboardOverlayLabel.midY = keyboard.height / 2
