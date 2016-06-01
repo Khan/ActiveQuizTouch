@@ -8,14 +8,18 @@ medGray = "rgba(216,216,216,1)"
 lightGray = "rgba(227,229,230,1)"
 darkGray = "rgba(98,101,105,1)"
 correctColor = "rgba(116,207,112,1)"
+incorrectColor = "rgba(255,132,130,1)"
 selectColor = "rgba(157,243,255,1)"
+whiteColor = "white"
+yellowColor = "yellow"
 
+questionPromptSize = 48
 
 #==========================================
 # Points
 
 pointsDisplay = new TextLayer
-	color: "white"
+	color: whiteColor
 	fontSize: 40
 	x: 30
 	y: 30
@@ -31,7 +35,7 @@ endTime = performance.now() + 60000
 lastTimeUpdate = 0
 
 timeDisplay = new TextLayer
-	color: "white"
+	color: whiteColor
 	fontSize: 40
 	width: 300
 	x: Screen.width - 330
@@ -107,8 +111,8 @@ setSelectedQuestion = (newSelectedQuestion) ->
 			opacity: if newSelectedQuestion then 0 else 1
 		time: 0.2
 
-questionNumberHeight = 80
-questionNumberSpacing = 20
+questionNumberHeight = 88
+questionNumberSpacing = 2
 
 questions = []
 
@@ -133,19 +137,20 @@ addQuestion = (newQuestion, animate) ->
 createQuestion = (difficulty, level) ->
 	question = new Layer
 		parent: questionScrollComponent.content
-		backgroundColor: "white"
+		backgroundColor: whiteColor
 		width: Screen.width
 		height: questionNumberHeight
 	question.setSelected = (selected) ->
 		
 		if question.isAnswered
 			question.backgroundColor = correctColor
+			question.answerLayer.backgroundColor = correctColor
 		else if selected
 			question.backgroundColor = selectColor
-			question.answerLayer.backgroundColor = "yellow"
+			question.answerLayer.backgroundColor = yellowColor
 		else
-			question.backgroundColor = "white"
-			question.answerLayer.backgroundColor = "white"
+			question.backgroundColor = whiteColor
+			question.answerLayer.backgroundColor = whiteColor
 		
 		question.answerLayer.text = "" if not selected and not question.isAnswered
 	question.onTap ->
@@ -166,18 +171,19 @@ createQuestion = (difficulty, level) ->
 	questionPrompt = new TextLayer
 		x: 30
 		autoSize: true
-		fontSize: 48
+		fontSize: questionPromptSize
 		color: "black"
 		parent: question
 		text: question.problem.label
+	questionPrompt.midY = question.height / 2
 		
 	question.answerLayer = new TextLayer
 		x: 400
 		width: 304
 		height: questionNumberHeight
 		fontSize: 48
-		color: "red"
-		backgroundColor: "white"
+		color: incorrectColor
+		backgroundColor: whiteColor
 		parent: question
 		text: ""
 		
@@ -217,11 +223,12 @@ createQuestion = (difficulty, level) ->
 				
 		else
 			oldColor = question.backgroundColor
-			question.backgroundColor = "red"
+			question.backgroundColor = incorrectColor
 			question.animate
 				properties:
 					backgroundColor: oldColor
-				time: 0.5
+				delay: 0.75
+				time: 2.0
 			question.ghostifyAnswer()
 		
 	return question	
