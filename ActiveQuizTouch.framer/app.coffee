@@ -3,10 +3,16 @@
 points = 0
 currentLevel = 4
 
+setGameState = null # Defined later; working around Framer definition ordering issues.
+currentGameStateRootLayer = new Layer
+	width: Screen.width
+	height: Screen.height
+
 #==========================================
 # Points
 
 pointsDisplay = new TextLayer
+	parent: currentGameStateRootLayer
 	color: "white"
 	fontSize: 40
 	x: 30
@@ -23,6 +29,7 @@ endTime = performance.now() + 60000
 lastTimeUpdate = 0
 
 timeDisplay = new TextLayer
+	parent: currentGameStateRootLayer
 	color: "white"
 	fontSize: 40
 	width: 300
@@ -33,6 +40,9 @@ timeDisplay = new TextLayer
 		
 updateTimer = (timestamp) ->
 	newTime = Math.ceil((endTime - timestamp) / 1000)
+	if newTime <= 0
+		setGameState "gameOver"
+		
 	if newTime != lastTimeUpdate
 		lastTimeUpdate = newTime
 		timeDisplay.text = "Remaining: " + newTime + "s"
@@ -212,6 +222,15 @@ createQuestion = (difficulty, level) ->
 #==========================================
 # Game state
 
+gameState = "level"
+setGameState = (newGameState) ->
+	return if newGameState == gameState
+	
+	switch newGameState
+		when "gameOver"
+			print "GAME OVER"
+	gameState = newGameState
+
 for questionNumber in [0..5]
 	question = createQuestion(currentLevel + Utils.randomChoice([0, 1, 2]), currentLevel)
 	addQuestion(question)
@@ -227,6 +246,7 @@ updatePendingNumber = (updateFunction) ->
 
 keyboardHeight = 432
 keyboard = new Layer
+	parent: currentGameStateRootLayer
 	y: Screen.height - keyboardHeight
 	width: Screen.width
 	height: keyboardHeight
@@ -328,6 +348,7 @@ for column in [0..3]
 questionScrollComponent.height -= keyboardHeight
 
 noSelectionKeyboardOverlay = new Layer
+	parent: currentGameStateRootLayer
 	width: keyboard.width
 	height: keyboard.height
 	x: keyboard.x
