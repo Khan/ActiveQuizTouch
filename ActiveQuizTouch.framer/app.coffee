@@ -241,7 +241,10 @@ for column in [0..3]
 			highlight:
 				backgroundColor: "rgba(134,255,242,1)"
 			normal:
-				backgroundColor: "rgba(20,155,131,1)"
+				if column == 3
+					backgroundColor: "rgba(227,229,230,1)"
+				else 
+					backgroundColor: "rgba(216,216,216,1)"
 		key.onTouchStart (event, layer) ->
 			layer.states.switch "highlight", time: 0.1, curve: "easeout"
 			
@@ -250,7 +253,7 @@ for column in [0..3]
 		key.states.switchInstant "normal"
 		
 		keyLabel = new TextLayer
-			color: "white"
+			color: "rgba(98,101,105,1)"
 			parent: key
 			autoSize: true
 			fontSize: 48
