@@ -26,6 +26,8 @@ framer/framer.generated.js
 framer/framer.init.js
 framer/framer.js
 framer/framer.js.map
+framer/framer.js.map.old
+framer/framer.js.old
 framer/framer.modules.js
 framer/images/background.png
 framer/images/cursor-active.png
