@@ -79,7 +79,7 @@ addTime = (extraSeconds) ->
 #==========================================
 # Problem Generation
 
-operators = [
+allOperators = [
 	{label: "+", operation: (a, b) -> a + b}
 	{label: "-", operation: (a, b) -> a - b}
 	{label: "*", operation: (a, b) -> a * b}
@@ -91,7 +91,7 @@ generateProblem = (difficulty, level) ->
 	maxOperandValue = (Math.floor(difficulty / 6) * 10) + 10
 	numberOfOperands = numberOfOperators + 1
 	numbers = [0..(numberOfOperands - 1)].map -> Math.floor(Utils.randomNumber(0, maxOperandValue))
-	operators = [0..(numberOfOperators - 1)].map -> Utils.randomChoice(operators[0..maxOperatorIndex])
+	operators = [0..(numberOfOperators - 1)].map -> Utils.randomChoice(allOperators[0..maxOperatorIndex])
 	
 	label = ""
 	answer = 0
