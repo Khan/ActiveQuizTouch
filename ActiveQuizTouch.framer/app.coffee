@@ -37,7 +37,7 @@ updateTimer = (timestamp) ->
 		lastTimeUpdate = newTime
 		timeDisplay.text = "Remaining: " + newTime + "s"
 	requestAnimationFrame updateTimer
-requestAnimationFrame updateTimer
+#requestAnimationFrame updateTimer
 
 addTime = (extraSeconds) ->
 	endTime += extraSeconds * 1000
