@@ -123,7 +123,7 @@ setSelectedQuestion = (newSelectedQuestion) ->
 			opacity: if newSelectedQuestion then 0 else 1
 		time: 0.2
 
-questionNumberHeight = 88
+questionNumberHeight = 100
 questionNumberSpacing = 2
 
 questions = []
@@ -184,7 +184,7 @@ createQuestion = (difficulty, level) ->
 		x: 30
 		autoSize: true
 		fontSize: questionPromptSize
-		color: "black"
+		color: darkGray
 		parent: question
 		text: question.problem.label
 	questionPrompt.midY = question.height / 2
@@ -198,12 +198,12 @@ createQuestion = (difficulty, level) ->
 		backgroundColor: whiteColor
 		parent: question
 		text: ""
-		
+	
 	question.answerBuffer = {number: null, sign: 1}
 		
 	question.updatePendingNumber = (newAnswerBuffer) ->
 		question.answerBuffer = newAnswerBuffer
-		question.answerLayer.color = "black"
+		question.answerLayer.color = darkGray
 		if newAnswerBuffer.number == 0
 			question.answerLayer.text = if newAnswerBuffer.sign == 1 then "0" else "-0"
 		else if newAnswerBuffer.number == null
@@ -460,7 +460,7 @@ newSelectionKeyboardOverlayLabel = new TextLayer
 	parent: noSelectionKeyboardOverlay
 	text: "Select a question"
 	autoSize: true
-	color: "black"
+	color: darkGray
 	fontFamily: "Proxima Nova"
 	fontSize: 48
 newSelectionKeyboardOverlayLabel.midX = keyboard.midX
