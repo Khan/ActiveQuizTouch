@@ -30,14 +30,14 @@ timeDisplay = new TextLayer
 	y: 30
 	textAlign: "right"
 	text: "Remaining: 3s"
-	
+		
 updateTimer = (timestamp) ->
 	newTime = Math.ceil((endTime - timestamp) / 1000)
 	if newTime != lastTimeUpdate
 		lastTimeUpdate = newTime
 		timeDisplay.text = "Remaining: " + newTime + "s"
 	requestAnimationFrame updateTimer
-requestAnimationFrame updateTimer
+# requestAnimationFrame updateTimer
 
 addTime = (extraSeconds) ->
 	endTime += extraSeconds * 1000
@@ -154,18 +154,21 @@ createQuestion = (difficulty, level) ->
 		parent: question
 		text: ""
 		
-	question.answerBuffer =
-		number: null
-		sign: 1
+	question.answerBuffer = {number: null, sign: 1}
 		
 	question.updatePendingNumber = (newAnswerBuffer) ->
 		question.answerBuffer = newAnswerBuffer
+		question.answerLayer.color = "black"
 		if newAnswerBuffer.number == 0
 			question.answerLayer.text = if newAnswerBuffer.sign == 1 then "0" else "-0"
 		else if newAnswerBuffer.number == null
 			question.answerLayer.text = if newAnswerBuffer.sign == 1 then "" else "-"
 		else
 			question.answerLayer.text = newAnswerBuffer.number * newAnswerBuffer.sign
+			
+	question.ghostifyAnswer = ->
+		question.answerLayer.color = "#ccc"
+		question.answerBuffer = {number: null, sign: 1}
 
 	question.submit = ->
 		return if question.isAnswered
@@ -191,6 +194,7 @@ createQuestion = (difficulty, level) ->
 				properties:
 					backgroundColor: oldColor
 				time: 0.5
+			question.ghostifyAnswer()
 		
 	return question	
 
