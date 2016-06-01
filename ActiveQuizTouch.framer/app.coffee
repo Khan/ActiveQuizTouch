@@ -17,15 +17,15 @@ pointsDisplay = new TextLayer
 	fontSize: 40
 	x: 30
 	y: 30
-updatePoints = (newPoints) ->
+setPoints = (newPoints) ->
 	pointsDisplay.text = "Points: " + newPoints
 	points = newPoints
-updatePoints(0)
+setPoints(0)
 
 #==========================================
 # Timer
 
-endTime = performance.now() + 60000
+endTime = Infinity
 lastTimeUpdate = 0
 
 timeDisplay = new TextLayer
@@ -201,7 +201,7 @@ createQuestion = (difficulty, level) ->
 			question.isAnswered = true
 			switch question.problem.reward.type
 				when "points"
-					updatePoints points + question.problem.reward.count
+					setPoints points + question.problem.reward.count
 				when "time"
 					addTime question.problem.reward.count
 			
@@ -277,18 +277,32 @@ gameOverScoreLabel = new TextLayer
 	gameOverLabel.midX = gameOverLayer.midX
 	
 retryButton = createButton "Play again", ->
-	print "PRESS"
+	setGameState "reset"
 retryButton.parent = gameOverLayer
 retryButton.y = 700
 
 #==========================================
 # Game state
 
-gameState = "level"
 setGameState = (newGameState) ->
 	return if newGameState == gameState
 	
 	switch newGameState
+		when "reset"
+			for question in questions
+				question.destroy()
+			questions = []
+			
+			levelRootLayer.visible = true
+			gameOverLayer.visible = false
+
+			# Start the clock at 60 seconds.
+			endTime = performance.now() + 60000
+			setPoints(0)
+			for questionNumber in [0..5]
+				question = createQuestion(currentLevel + Utils.randomChoice([0, 1, 2]), currentLevel)
+				addQuestion(question)
+			
 		when "gameOver"
 			levelRootLayer.visible = false
 			gameOverLayer.visible = true
@@ -296,9 +310,7 @@ setGameState = (newGameState) ->
 			gameOverScoreLabel.midX = gameOverLayer.midX
 	gameState = newGameState
 
-for questionNumber in [0..5]
-	question = createQuestion(currentLevel + Utils.randomChoice([0, 1, 2]), currentLevel)
-	addQuestion(question)
+setGameState "reset"
 
 #==========================================
 # Answer Input
