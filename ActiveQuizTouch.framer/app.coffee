@@ -2,6 +2,7 @@
 
 points = 0
 currentLevel = 4
+startingClockTimeInSeconds = 60
 
 setGameState = null # Defined later; working around Framer definition ordering issues.
 levelRootLayer = new Layer
@@ -297,7 +298,7 @@ setGameState = (newGameState) ->
 			gameOverLayer.visible = false
 
 			# Start the clock at 60 seconds.
-			endTime = performance.now() + 60000
+			endTime = performance.now() + startingClockTimeInSeconds * 1000
 			setPoints(0)
 			for questionNumber in [0..5]
 				question = createQuestion(currentLevel + Utils.randomChoice([0, 1, 2]), currentLevel)
