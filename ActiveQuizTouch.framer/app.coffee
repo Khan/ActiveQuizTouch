@@ -56,8 +56,8 @@ generateProblem = (difficulty, level) ->
 	numberOfOperators = (Math.floor(difficulty / 2) % 3) + 1
 	maxOperandValue = (Math.floor(difficulty / 6) * 10) + 10
 	numberOfOperands = numberOfOperators + 1
-	numbers = [0..numberOfOperands].map -> Math.floor(Utils.randomNumber(0, maxOperandValue))
-	operators = [0..numberOfOperators].map -> Utils.randomChoice(operators[0..maxOperatorIndex])
+	numbers = [0..(numberOfOperands - 1)].map -> Math.floor(Utils.randomNumber(0, maxOperandValue))
+	operators = [0..(numberOfOperators - 1)].map -> Utils.randomChoice(operators[0..maxOperatorIndex])
 	
 	label = ""
 	answer = 0
@@ -182,7 +182,8 @@ createQuestion = (difficulty, level) ->
 			
 			question.setSelected false
 			
-			addQuestion createQuestion(difficulty, level), true for [0...question.problem.questionsRevealed]
+			for questionNumber in [0...question.problem.questionsRevealed]
+				addQuestion createQuestion(difficulty, level), true
 		else
 			oldColor = question.backgroundColor
 			question.backgroundColor = "red"
