@@ -30,14 +30,16 @@ timeDisplay = new TextLayer
 	y: 30
 	textAlign: "right"
 	text: "Remaining: 3s"
-	
+		
 updateTimer = (timestamp) ->
 	newTime = Math.ceil((endTime - timestamp) / 1000)
 	if newTime != lastTimeUpdate
 		lastTimeUpdate = newTime
 		timeDisplay.text = "Remaining: " + newTime + "s"
 	requestAnimationFrame updateTimer
-#requestAnimationFrame updateTimer
+
+# requestAnimationFrame updateTimer
+
 
 addTime = (extraSeconds) ->
 	endTime += extraSeconds * 1000
@@ -56,8 +58,8 @@ generateProblem = (difficulty, level) ->
 	numberOfOperators = (Math.floor(difficulty / 2) % 3) + 1
 	maxOperandValue = (Math.floor(difficulty / 6) * 10) + 10
 	numberOfOperands = numberOfOperators + 1
-	numbers = [0..numberOfOperands].map -> Math.floor(Utils.randomNumber(0, maxOperandValue))
-	operators = [0..numberOfOperators].map -> Utils.randomChoice(operators[0..maxOperatorIndex])
+	numbers = [0..(numberOfOperands - 1)].map -> Math.floor(Utils.randomNumber(0, maxOperandValue))
+	operators = [0..(numberOfOperators - 1)].map -> Utils.randomChoice(operators[0..maxOperatorIndex])
 	
 	label = ""
 	answer = 0
@@ -154,18 +156,21 @@ createQuestion = (difficulty, level) ->
 		parent: question
 		text: ""
 		
-	question.answerBuffer =
-		number: null
-		sign: 1
+	question.answerBuffer = {number: null, sign: 1}
 		
 	question.updatePendingNumber = (newAnswerBuffer) ->
 		question.answerBuffer = newAnswerBuffer
+		question.answerLayer.color = "black"
 		if newAnswerBuffer.number == 0
 			question.answerLayer.text = if newAnswerBuffer.sign == 1 then "0" else "-0"
 		else if newAnswerBuffer.number == null
 			question.answerLayer.text = if newAnswerBuffer.sign == 1 then "" else "-"
 		else
 			question.answerLayer.text = newAnswerBuffer.number * newAnswerBuffer.sign
+			
+	question.ghostifyAnswer = ->
+		question.answerLayer.color = "#ccc"
+		question.answerBuffer = {number: null, sign: 1}
 
 	question.submit = ->
 		return if question.isAnswered
@@ -182,7 +187,8 @@ createQuestion = (difficulty, level) ->
 			
 			question.setSelected false
 			
-			addQuestion createQuestion(difficulty, level), true for [0...question.problem.questionsRevealed]
+			for questionNumber in [0...question.problem.questionsRevealed]
+				addQuestion createQuestion(difficulty, level), true
 		else
 			oldColor = question.backgroundColor
 			question.backgroundColor = "red"
@@ -190,6 +196,7 @@ createQuestion = (difficulty, level) ->
 				properties:
 					backgroundColor: oldColor
 				time: 0.5
+			question.ghostifyAnswer()
 		
 	return question	
 
@@ -227,8 +234,8 @@ appendDigit = (digit) ->
 		
 for column in [0..3]
 	for row in [0..3]
-		if row == 3 and column > 0
-			# These keys are "eaten" by the big 0 and submit keys
+		if (row == 3 and column > 1) or (row == 1 and column == 3)
+			# These keys are "eaten" by the big 0, backspace, and submit keys
 			continue
 		
 		key = new Layer
@@ -268,6 +275,7 @@ for column in [0..3]
 		else if column == 3 && row == 0
 			# Backspace
 			keyLabel.text = "bspace"
+			key.height = keyHeight * 2 - keySpacing
 			key.onTouchEnd (event, layer) ->
 				updatePendingNumber (answerBuffer) ->
 					if answerBuffer.number > 0
@@ -283,14 +291,6 @@ for column in [0..3]
 						# If there's no number, just remove the negative.
 						{ number: null, sign: 1 }
 				unhighlight event, layer
-		else if column == 3 && row == 1
-			# Plus/minus
-			keyLabel.text = "+/–"
-			key.onTouchEnd (event, layer) ->
-				updatePendingNumber (answerBuffer) ->
-					number: answerBuffer.number
-					sign: answerBuffer.sign * -1
-				unhighlight event, layer
 		else if column == 3 && row == 2
 			# Submit
 			keyLabel.text = "Submit"
@@ -299,12 +299,20 @@ for column in [0..3]
 				selectedQuestion.submit()
 				unhighlight event, layer
 		else if column == 0 && row == 3
+			# Plus/minus
+			keyLabel.text = "+/–"
+			key.onTouchEnd (event, layer) ->
+				updatePendingNumber (answerBuffer) ->
+					number: answerBuffer.number
+					sign: answerBuffer.sign * -1
+				unhighlight event, layer
+		else if column == 1 && row == 3
 			# Extra-wide zero key
 			keyLabel.text = "0"
 			key.onTouchEnd (event, layer) ->
 				appendDigit 0
 				unhighlight event, layer
-			key.width = keyWidth * 3 - keySpacing
+			key.width = keyWidth * 2 - keySpacing
 			
 		keyLabel.center()
 
