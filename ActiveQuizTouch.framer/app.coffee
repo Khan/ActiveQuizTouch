@@ -10,6 +10,8 @@ levelRootLayer = new Layer
 	height: Screen.height
 
 #==========================================
+# Style Stuffz
+
 # Color Palette
 
 medGray = "rgba(216,216,216,1)"
@@ -20,8 +22,13 @@ incorrectColor = "rgba(255,132,130,1)"
 selectColor = "rgba(157,243,255,1)"
 whiteColor = "white"
 yellowColor = "yellow"
+transparent = "rgba(0,0,0,0)"
+
+# Sizes of things
 
 questionPromptSize = 48
+questionNumberHeight = 100
+questionNumberSpacing = 2
 
 #==========================================
 # Points
@@ -125,9 +132,6 @@ setSelectedQuestion = (newSelectedQuestion) ->
 			opacity: if newSelectedQuestion then 0 else 1
 		time: 0.2
 
-questionNumberHeight = 100
-questionNumberSpacing = 2
-
 questions = []
 
 addQuestion = (newQuestion, animate) ->
@@ -154,17 +158,18 @@ createQuestion = (difficulty, level) ->
 		backgroundColor: whiteColor
 		width: Screen.width
 		height: questionNumberHeight
+	
 	question.setSelected = (selected) ->
 		
 		if question.isAnswered
 			question.backgroundColor = correctColor
-			question.answerLayer.backgroundColor = correctColor
+# 			question.answerLayer.backgroundColor = correctColor
 		else if selected
 			question.backgroundColor = selectColor
-			question.answerLayer.backgroundColor = yellowColor
+# 			question.answerLayer.backgroundColor = selectColor
 		else
 			question.backgroundColor = whiteColor
-			question.answerLayer.backgroundColor = whiteColor
+# 			question.answerLayer.backgroundColor = whiteColor
 		
 		question.answerLayer.text = "" if not selected and not question.isAnswered
 	question.onTap ->
@@ -198,7 +203,7 @@ createQuestion = (difficulty, level) ->
 		height: questionNumberHeight
 		fontSize: questionPromptSize
 		color: incorrectColor
-		backgroundColor: whiteColor
+		backgroundColor: transparent
 		parent: question
 		text: "foo"
 	# this is dumb but if we don't do this then the answerLayer size is technically still 0 and we can't move its midpoint
@@ -217,7 +222,7 @@ createQuestion = (difficulty, level) ->
 			question.answerLayer.text = newAnswerBuffer.number * newAnswerBuffer.sign
 			
 	question.ghostifyAnswer = ->
-		question.answerLayer.color = "#ccc"
+		question.answerLayer.color = medGray
 		question.answerBuffer = {number: null, sign: 1}
 
 	question.submit = ->
