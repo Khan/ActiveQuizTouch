@@ -4,7 +4,7 @@ points = 0
 currentLevel = 4
 
 setGameState = null # Defined later; working around Framer definition ordering issues.
-currentGameStateRootLayer = new Layer
+levelRootLayer = new Layer
 	width: Screen.width
 	height: Screen.height
 
@@ -12,7 +12,7 @@ currentGameStateRootLayer = new Layer
 # Points
 
 pointsDisplay = new TextLayer
-	parent: currentGameStateRootLayer
+	parent: levelRootLayer
 	color: "white"
 	fontSize: 40
 	x: 30
@@ -29,7 +29,7 @@ endTime = performance.now() + 60000
 lastTimeUpdate = 0
 
 timeDisplay = new TextLayer
-	parent: currentGameStateRootLayer
+	parent: levelRootLayer
 	color: "white"
 	fontSize: 40
 	width: 300
@@ -88,6 +88,7 @@ generateProblem = (difficulty, level) ->
 # Game "board"
 
 questionScrollComponent = new ScrollComponent
+	parent: levelRootLayer
 	y: 110
 	width: Screen.width
 	height: Screen.height - 110
@@ -220,6 +221,67 @@ createQuestion = (difficulty, level) ->
 	return question	
 
 #==========================================
+# UI button
+
+createButton = (text, action) ->
+	button = new Layer
+		width: Screen.width
+		height: 100
+	button.states.add
+		normal:
+			backgroundColor: "rgba(216,216,216,1)"
+		highlight:
+			backgroundColor: "rgba(134,255,242,1)"
+	button.states.switchInstant "normal"
+	button.onTouchStart ->
+		button.states.switch "highlight", time: 0.1, curve: "easeout"
+	button.onTouchEnd ->
+		button.states.switch "normal", time: 0.3, curve: "easeout"
+		action()
+			
+	buttonLabel = new TextLayer
+		parent: button
+		fontSize: 48
+		fontFamily: "Proxima Nova"
+		color: "black"
+		autoSize: true
+		text: text
+	buttonLabel.midX = button.width / 2
+	buttonLabel.midY = button.height / 2
+	return button
+
+#==========================================
+# Game over UI
+
+gameOverLayer = new Layer
+	width: Screen.width
+	height: Screen.height
+	visible: false
+gameOverLabel = new TextLayer
+	parent: gameOverLayer
+	color: "white"
+	y: 300
+	autoSize: true
+	text: "Game Over!"
+	fontFamily: "Proxima Nova"
+	fontSize: 80
+gameOverLabel.midX = gameOverLayer.midX
+
+gameOverScoreLabel = new TextLayer
+	parent: gameOverLayer
+	color: "white"
+	y: 500
+	autoSize: true
+	fontFamily: "Proxima Nova"
+	fontSize: 48
+	gameOverLabel.midX = gameOverLayer.midX
+	
+retryButton = createButton "Play again", ->
+	print "PRESS"
+retryButton.parent = gameOverLayer
+retryButton.y = 700
+
+#==========================================
 # Game state
 
 gameState = "level"
@@ -228,7 +290,10 @@ setGameState = (newGameState) ->
 	
 	switch newGameState
 		when "gameOver"
-			print "GAME OVER"
+			levelRootLayer.visible = false
+			gameOverLayer.visible = true
+			gameOverScoreLabel.text = "Your score: " + points + " points"
+			gameOverScoreLabel.midX = gameOverLayer.midX
 	gameState = newGameState
 
 for questionNumber in [0..5]
@@ -246,7 +311,7 @@ updatePendingNumber = (updateFunction) ->
 
 keyboardHeight = 432
 keyboard = new Layer
-	parent: currentGameStateRootLayer
+	parent: levelRootLayer
 	y: Screen.height - keyboardHeight
 	width: Screen.width
 	height: keyboardHeight
@@ -348,7 +413,7 @@ for column in [0..3]
 questionScrollComponent.height -= keyboardHeight
 
 noSelectionKeyboardOverlay = new Layer
-	parent: currentGameStateRootLayer
+	parent: levelRootLayer
 	width: keyboard.width
 	height: keyboard.height
 	x: keyboard.x
