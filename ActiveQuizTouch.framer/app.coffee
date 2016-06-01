@@ -9,7 +9,9 @@ levelRootLayer = new Layer
 	width: Screen.width
 	height: Screen.height
 
+#==========================================
 # Color Palette
+
 medGray = "rgba(216,216,216,1)"
 lightGray = "rgba(227,229,230,1)"
 darkGray = "rgba(98,101,105,1)"
@@ -254,9 +256,9 @@ createButton = (text, action) ->
 		height: 100
 	button.states.add
 		normal:
-			backgroundColor: "rgba(216,216,216,1)"
+			backgroundColor: medGray
 		highlight:
-			backgroundColor: "rgba(134,255,242,1)"
+			backgroundColor: selectColor
 	button.states.switchInstant "normal"
 	button.onTouchStart ->
 		button.states.switch "highlight", time: 0.1, curve: "easeout"
