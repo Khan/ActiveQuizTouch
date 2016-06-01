@@ -175,8 +175,8 @@ createQuestion = (difficulty, level) ->
 			number: null
 			sign: 1
 			
-		for questionNumber in [0...question.problem.questionsRevealed]
-				addQuestion createQuestion(difficulty, level), true
+# 		for questionNumber in [0...question.problem.questionsRevealed]
+# 				addQuestion createQuestion(difficulty, level), true
 			
 	question.problem = generateProblem(difficulty, level)
 	
@@ -194,13 +194,16 @@ createQuestion = (difficulty, level) ->
 	question.answerLayer = new TextLayer
 		x: 400
 		width: 304
+		autoSize: true
 		height: questionNumberHeight
-		fontSize: 48
+		fontSize: questionPromptSize
 		color: incorrectColor
 		backgroundColor: whiteColor
 		parent: question
-		text: ""
-	
+		text: "foo"
+	# this is dumb but if we don't do this then the answerLayer size is technically still 0 and we can't move its midpoint
+	question.answerLayer.midY = question.height / 2
+	question.answerLayer.text =  " " 
 	question.answerBuffer = {number: null, sign: 1}
 		
 	question.updatePendingNumber = (newAnswerBuffer) ->
