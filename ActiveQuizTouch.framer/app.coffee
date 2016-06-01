@@ -1,7 +1,7 @@
 {TextLayer} = require 'TextLayer'
 
 points = 0
-currentLevel = 4
+currentLevel = 1
 startingClockTimeInSeconds = 60
 
 setGameState = null # Defined later; working around Framer definition ordering issues.
@@ -242,6 +242,10 @@ createQuestion = (difficulty, level) ->
 			
 			for questionNumber in [0...question.problem.questionsRevealed]
 				addQuestion createQuestion(difficulty, level), true
+
+			# HACK: Implement real "exit" logic.
+			if Utils.randomChoice [true, false]
+				setGameState "levelComplete"
 				
 		else
 			oldColor = question.backgroundColor
@@ -286,6 +290,35 @@ createButton = (text, action) ->
 	return button
 
 #==========================================
+# Level complete UI
+
+levelCompleteLayer = new Layer
+	width: Screen.width
+	height: Screen.height
+	visible: false
+levelCompleteLabel = new TextLayer
+	parent: levelCompleteLayer
+	color: "white"
+	y: 300
+	autoSize: true
+	fontFamily: "Proxima Nova"
+	fontSize: 80
+
+levelCompleteScoreLabel = new TextLayer
+	parent: levelCompleteLayer
+	color: "white"
+	y: 500
+	autoSize: true
+	fontFamily: "Proxima Nova"
+	fontSize: 48
+	
+nextLevelButton = createButton "Next level", ->
+	currentLevel += 1
+	setGameState "level"
+nextLevelButton.parent = levelCompleteLayer
+nextLevelButton.y = 700
+
+#==========================================
 # Game over UI
 
 gameOverLayer = new Layer
@@ -309,10 +342,9 @@ gameOverScoreLabel = new TextLayer
 	autoSize: true
 	fontFamily: "Proxima Nova"
 	fontSize: 48
-	gameOverLabel.midX = gameOverLayer.midX
 	
 retryButton = createButton "Play again", ->
-	setGameState "reset"
+	setGameState "newGame"
 retryButton.parent = gameOverLayer
 retryButton.y = 700
 
@@ -323,29 +355,45 @@ setGameState = (newGameState) ->
 	return if newGameState == gameState
 	
 	switch newGameState
-		when "reset"
+		when "newGame"
+			endTime = performance.now() + startingClockTimeInSeconds * 1000
+			setPoints 0
+			setGameState "level"
+			
+		when "level"
 			for question in questions
 				question.destroy()
 			questions = []
 			
 			levelRootLayer.visible = true
+			levelCompleteLayer.visible = false
 			gameOverLayer.visible = false
 
-			# Start the clock at 60 seconds.
-			endTime = performance.now() + startingClockTimeInSeconds * 1000
-			setPoints(0)
 			for questionNumber in [0..5]
-				question = createQuestion(currentLevel + Utils.randomChoice([0, 1, 2]), currentLevel)
-				addQuestion(question)
+				question = createQuestion currentLevel + Utils.randomChoice([0, 1, 2]), currentLevel
+				addQuestion question
+
+		when "levelComplete"
+			levelRootLayer.visible = false
+			levelCompleteLayer.visible = true
+			gameOverLayer.visible = false
+			
+			levelCompleteLabel.text = "Completed level " + currentLevel + "!"
+			levelCompleteLabel.midX = levelCompleteLayer.midX
+
+			levelCompleteScoreLabel.text = "Current score: " + points
+			levelCompleteScoreLabel.midX = levelCompleteLayer.midX
 			
 		when "gameOver"
 			levelRootLayer.visible = false
+			levelCompleteLayer.visible = false
 			gameOverLayer.visible = true
+			
 			gameOverScoreLabel.text = "Your score: " + points + " points"
 			gameOverScoreLabel.midX = gameOverLayer.midX
 	gameState = newGameState
 
-setGameState "reset"
+setGameState "newGame"
 
 #==========================================
 # Answer Input
