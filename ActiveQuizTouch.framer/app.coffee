@@ -1,13 +1,17 @@
 {TextLayer} = require 'TextLayer'
 
 points = 0
-currentLevel = 1
+currentLevel = null # 1-indexed (for convenience, because it's shown to the user)
+exitQuestionIndex = null # Tracks which question index is going to be the exit question in this level--it may not have been added yet.
 startingClockTimeInSeconds = 60
 
 setGameState = null # Defined later; working around Framer definition ordering issues.
 levelRootLayer = new Layer
 	width: Screen.width
 	height: Screen.height
+	
+clip = (value, min, max) ->
+	Math.max(min, Math.min(max, value))
 
 #==========================================
 # Style Stuffz
@@ -70,7 +74,7 @@ updateTimer = (timestamp) ->
 		timeDisplay.text = "Remaining: " + newTime + "s"
 	requestAnimationFrame updateTimer
 
-# requestAnimationFrame updateTimer
+requestAnimationFrame updateTimer
 
 
 addTime = (extraSeconds) ->
@@ -109,6 +113,9 @@ generateProblem = (difficulty, level) ->
 #==========================================
 # Game "board"
 
+maximumNumberOfProblems = (levelNumber) ->
+	return levelNumber * levelNumber
+
 questionScrollComponent = new ScrollComponent
 	parent: levelRootLayer
 	y: 110
@@ -127,7 +134,7 @@ setSelectedQuestion = (newSelectedQuestion) ->
 	selectedQuestion = newSelectedQuestion
 	newSelectedQuestion?.setSelected true
 	
-	noSelectionKeyboardOverlay.animate
+	noSelectionKeyboardOverlay?.animate
 		properties:
 			opacity: if newSelectedQuestion then 0 else 1
 		time: 0.2
@@ -135,6 +142,10 @@ setSelectedQuestion = (newSelectedQuestion) ->
 questions = []
 
 addQuestion = (newQuestion, animate) ->
+	if questions.length == exitQuestionIndex
+		# That means we're about to add the end question! Neat!
+		newQuestion.markAsExitQuestion()
+		
 	questions.unshift(newQuestion)
 	
 	for questionIndex in [0..(questions.length - 1)]
@@ -148,6 +159,8 @@ addQuestion = (newQuestion, animate) ->
 				curve:"spring(400,15,5)"
 		else
 			question.y = y
+			
+	questionScrollComponent.updateContent() # Resize the scrollable bounds of the question scroll component according to the new layout
 
 #==========================================
 # Question Cells
@@ -158,7 +171,7 @@ createQuestion = (difficulty, level) ->
 		backgroundColor: whiteColor
 		width: Screen.width
 		height: questionNumberHeight
-	
+		
 	question.setSelected = (selected) ->
 		
 		if question.isAnswered
@@ -186,6 +199,11 @@ createQuestion = (difficulty, level) ->
 	question.problem = generateProblem(difficulty, level)
 	
 	question.isAnswered = false
+	
+	question.markAsExitQuestion = ->
+		question.borderColor = "orange"
+		question.borderWidth = 4
+		question.isExit = true
 			
 	questionPrompt = new TextLayer
 		x: 30
@@ -240,11 +258,23 @@ createQuestion = (difficulty, level) ->
 			
 			setSelectedQuestion null
 			
-			for questionNumber in [0...question.problem.questionsRevealed]
-				addQuestion createQuestion(difficulty, level), true
+			isLastAvailableQuestion = questions.filter((question) -> not question.isAnswered).length == 0
+# 			print "IS LAST AVAILABLE" if isLastAvailableQuestion
+			
+			effectiveNumberOfQuestionsRevealed = clip(
+				question.problem.questionsRevealed,
+				if isLastAvailableQuestion then 1 else 0, 
+				maximumNumberOfProblems(level) - questions.length
+			)
+# 			print effectiveNumberOfQuestionsRevealed
+			
+			for questionNumber in [0...effectiveNumberOfQuestionsRevealed]
+				# New question difficulty is based on previous question difficulty, but the difficulty level can only shift by 1 (either direction) each time, and it can never be more than 2 levels of difficult beyond the base level number.
+				newDifficulty = clip(difficulty + Utils.randomChoice([-1, 0, 1]), level, level + 2)
+				addQuestion createQuestion(newDifficulty, level), true
 
 			# HACK: Implement real "exit" logic.
-			if Utils.randomChoice [true, false]
+			if question.isExit
 				setGameState "levelComplete"
 				
 		else
@@ -356,11 +386,14 @@ setGameState = (newGameState) ->
 	
 	switch newGameState
 		when "newGame"
+			currentLevel = 1
 			endTime = performance.now() + startingClockTimeInSeconds * 1000
 			setPoints 0
 			setGameState "level"
 			
 		when "level"
+			setSelectedQuestion null
+		
 			for question in questions
 				question.destroy()
 			questions = []
@@ -368,10 +401,10 @@ setGameState = (newGameState) ->
 			levelRootLayer.visible = true
 			levelCompleteLayer.visible = false
 			gameOverLayer.visible = false
+			
+			exitQuestionIndex = Math.round(Utils.randomNumber(Math.floor(maximumNumberOfProblems(currentLevel) / 2), maximumNumberOfProblems(currentLevel) - 1))
 
-			for questionNumber in [0..5]
-				question = createQuestion currentLevel + Utils.randomChoice([0, 1, 2]), currentLevel
-				addQuestion question
+			addQuestion createQuestion(currentLevel, currentLevel)
 
 		when "levelComplete"
 			levelRootLayer.visible = false
