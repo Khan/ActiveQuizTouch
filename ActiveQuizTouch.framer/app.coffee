@@ -114,7 +114,8 @@ generateProblem = (difficulty, level) ->
 # Game "board"
 
 maximumNumberOfProblems = (levelNumber) ->
-	return levelNumber * levelNumber
+	# 1, 2, 5, 8, 13, 18, 26, ...
+	return Math.ceil(levelNumber * levelNumber / 2)
 
 questionScrollComponent = new ScrollComponent
 	parent: levelRootLayer
