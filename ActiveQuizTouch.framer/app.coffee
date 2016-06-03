@@ -172,19 +172,45 @@ createQuestion = (difficulty, level) ->
 		backgroundColor: whiteColor
 		width: Screen.width
 		height: questionNumberHeight
+<<<<<<< Updated upstream
 		
+=======
+	
+	highlightLayer = new Layer
+		parent: question
+		backgroundColor: selectColor
+		width: 0
+		height: 100
+	
+>>>>>>> Stashed changes
 	question.setSelected = (selected) ->
 		
 		if question.isAnswered
 			question.backgroundColor = correctColor
-# 			question.answerLayer.backgroundColor = correctColor
+			highlightLayer.animate
+				properties:
+					height: 0
+					y: questionNumberHeight
+				curve: "ease-in-out"
+				time: 0.3
+			
 		else if selected
-			question.backgroundColor = selectColor
-# 			question.answerLayer.backgroundColor = selectColor
+			highlightLayer.height = questionNumberHeight
+			highlightLayer.y = 0
+			highlightLayer.animate
+				properties:
+					width: Screen.width
+				curve: "ease-in-out"
+				time: 0.35
 		else
+			highlightLayer.height = questionNumberHeight
+			highlightLayer.y = 0
+			highlightLayer.animate
+				properties:
+					width: 0
+				curve: "ease-in-out"
+				time: 0.2
 			question.backgroundColor = whiteColor
-# 			question.answerLayer.backgroundColor = whiteColor
-		
 		question.answerLayer.text = "" if not selected and not question.isAnswered
 	question.onTap ->
 		return if question.isAnswered
@@ -281,11 +307,20 @@ createQuestion = (difficulty, level) ->
 		else
 			oldColor = question.backgroundColor
 			question.backgroundColor = incorrectColor
-			question.animate
+			highlightLayer.animate
 				properties:
-					backgroundColor: oldColor
-				delay: 0.75
-				time: 2.0
+					height: 0
+				curve: "ease-in-out"
+				time: 0.3
+
+# 			if true
+# 				question.animate
+# 					properties:
+# 						backgroundColor: selectColor
+# 					delay: 0.75
+# 					time: 2.0
+# 			else 
+# 				question.backgroundColor = whiteColor
 			question.ghostifyAnswer()
 		
 	return question	
