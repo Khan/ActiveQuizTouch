@@ -59,6 +59,7 @@ setPoints(0)
 # Timer
 
 endTime = Infinity
+pauseTime = null # When set, contains the remaining number of milliseconds before the game should end
 lastTimeUpdate = 0
 
 timeDisplay = new TextLayer
@@ -70,8 +71,16 @@ timeDisplay = new TextLayer
 	y: 30
 	textAlign: "right"
 	text: "Remaining: 3s"
-		
+
+pause = -> pauseTime = endTime - performance.now()
+unpause = ->
+	return if pauseTime == null
+	endTime = performance.now() + pauseTime
+	pauseTime = null
+
 updateTimer = (timestamp) ->
+	return if pauseTime != null
+	
 	newTime = Math.ceil((endTime - timestamp) / 1000)
 	if newTime <= 0
 		setGameState "gameOver"
@@ -453,8 +462,12 @@ setGameState = (newGameState) ->
 			initialQuestion = createQuestion(currentLevel, currentLevel)
 			addQuestion initialQuestion
 			setSelectedQuestion initialQuestion, false
+			
+			unpause()
 
 		when "levelComplete"
+			pause()
+			
 			# Give rewards for all remaining unanswered questions.
 			for question in questions
 				if not question.isAnswered
