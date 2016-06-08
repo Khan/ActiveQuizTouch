@@ -79,6 +79,8 @@ unpause = ->
 	pauseTime = null
 
 updateTimer = (timestamp) ->
+	requestAnimationFrame updateTimer
+
 	return if pauseTime != null
 	
 	newTime = Math.ceil((endTime - timestamp) / 1000)
@@ -88,7 +90,6 @@ updateTimer = (timestamp) ->
 	if newTime != lastTimeUpdate
 		lastTimeUpdate = newTime
 		timeDisplay.text = "Remaining: " + newTime + "s"
-	requestAnimationFrame updateTimer
 
 requestAnimationFrame updateTimer
 
