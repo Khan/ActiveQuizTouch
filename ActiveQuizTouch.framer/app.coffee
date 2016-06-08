@@ -155,26 +155,40 @@ setSelectedQuestion = (newSelectedQuestion, animated) ->
 	
 questions = []
 
-addQuestion = (newQuestion, animate) ->
+addQuestion = (newQuestion, animated) ->
 	if questions.length == exitQuestionIndex
 		# That means we're about to add the end question! Neat!
 		newQuestion.markAsExitQuestion()
 		
 	questions.unshift(newQuestion)
+	updateQuestionLayout animated
 	
-	for questionIndex in [0..(questions.length - 1)]
-		y = questionIndex * (questionNumberHeight + questionNumberSpacing)
-		question = questions[questionIndex]
-		if animate
-			question.animate
-				properties:
-					y: y
-				time: 0.2
-				curve:"spring(400,15,5)"
-		else
-			question.y = y
+updateQuestionLayout = (animated) ->
+	answeredQuestions = questions.filter (question) -> question.isAnswered
+	unansweredQuestions = questions.filter (question) -> not question.isAnswered
+	
+	y = 0
+	delay = 0
+	for question in unansweredQuestions
+		question.animate
+			properties:
+				y: y
+			time: if animated then 0.2 else 0
+			delay: delay
+		y += questionNumberHeight + questionNumberSpacing
+		delay += 0.02
+	for question in answeredQuestions
+		question.animate
+			properties:
+				y: y
+			time: if animated then 0.2 else 0
+			delay: delay
+		y += questionNumberHeight + questionNumberSpacing
+		delay += 0.02
 			
-	questionScrollComponent.updateContent() # Resize the scrollable bounds of the question scroll component according to the new layout
+	setTimeout(->
+		questionScrollComponent.updateContent() # Resize the scrollable bounds of the question scroll component according to the new layout
+	, (delay + 0.2) * 1000)
 
 #==========================================
 # Question Cells
@@ -318,6 +332,7 @@ createQuestion = (difficulty, level) ->
 					# New question difficulty is based on previous question difficulty, but the difficulty level can only shift by 1 (either direction) each time, and it can never be more than 2 levels of difficult beyond the base level number.
 					newDifficulty = clip(difficulty + Utils.randomChoice([-1, 0, 1]), level, level + 2)
 					addQuestion createQuestion(newDifficulty, level), true
+				updateQuestionLayout true
 		else
 			incorrectHighlightLayer = new Layer
 				parent: question
