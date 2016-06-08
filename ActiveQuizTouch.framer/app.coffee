@@ -125,7 +125,7 @@ generateProblem = (difficulty, level) ->
 	reward:
 		count: (difficulty - level) + 1
 		type: if Math.random(1) > 0.33 then "points" else "time"
-	questionsRevealed: Utils.randomChoice([0, 0, 1, 1, 1, 2, 3])
+	questionsRevealed: Utils.randomChoice([0, 1, 1, 2, 2, 2, 3])
 
 #==========================================
 # Game "board"
