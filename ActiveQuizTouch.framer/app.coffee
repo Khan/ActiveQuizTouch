@@ -172,17 +172,13 @@ createQuestion = (difficulty, level) ->
 		backgroundColor: whiteColor
 		width: Screen.width
 		height: questionNumberHeight
-<<<<<<< Updated upstream
-		
-=======
 	
 	highlightLayer = new Layer
 		parent: question
 		backgroundColor: selectColor
 		width: 0
 		height: 100
-	
->>>>>>> Stashed changes
+
 	question.setSelected = (selected) ->
 		
 		if question.isAnswered
