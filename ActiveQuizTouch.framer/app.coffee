@@ -269,6 +269,14 @@ createQuestion = (difficulty, level) ->
 	question.ghostifyAnswer = ->
 		question.answerLayer.color = medGray
 		question.answerBuffer = {number: null, sign: 1}
+		
+	question.giveRewards = ->
+		switch question.problem.reward.type
+			when "points"
+				setPoints points + question.problem.reward.count
+			when "time"
+				addTime question.problem.reward.count
+
 
 	question.submit = ->
 		return if question.isAnswered
@@ -277,33 +285,23 @@ createQuestion = (difficulty, level) ->
 		isCorrect = userAnswer == question.problem.answer
 		if isCorrect
 			question.isAnswered = true
-			switch question.problem.reward.type
-				when "points"
-					setPoints points + question.problem.reward.count
-				when "time"
-					addTime question.problem.reward.count
-			
+			question.giveRewards()
 			setSelectedQuestion null
 			
-			isLastAvailableQuestion = questions.filter((question) -> not question.isAnswered).length == 0
-# 			print "IS LAST AVAILABLE" if isLastAvailableQuestion
-			
-			effectiveNumberOfQuestionsRevealed = clip(
-				question.problem.questionsRevealed,
-				if isLastAvailableQuestion then 1 else 0, 
-				maximumNumberOfProblems(level) - questions.length
-			)
-# 			print effectiveNumberOfQuestionsRevealed
-			
-			for questionNumber in [0...effectiveNumberOfQuestionsRevealed]
-				# New question difficulty is based on previous question difficulty, but the difficulty level can only shift by 1 (either direction) each time, and it can never be more than 2 levels of difficult beyond the base level number.
-				newDifficulty = clip(difficulty + Utils.randomChoice([-1, 0, 1]), level, level + 2)
-				addQuestion createQuestion(newDifficulty, level), true
-
-			# HACK: Implement real "exit" logic.
 			if question.isExit
 				setGameState "levelComplete"
-				
+			else
+				# Reveal new questions:
+				isLastAvailableQuestion = questions.filter((question) -> not question.isAnswered).length == 0
+				effectiveNumberOfQuestionsRevealed = clip(
+					question.problem.questionsRevealed,
+					if isLastAvailableQuestion then 1 else 0, 
+					maximumNumberOfProblems(level) - questions.length
+				)
+				for questionNumber in [0...effectiveNumberOfQuestionsRevealed]
+					# New question difficulty is based on previous question difficulty, but the difficulty level can only shift by 1 (either direction) each time, and it can never be more than 2 levels of difficult beyond the base level number.
+					newDifficulty = clip(difficulty + Utils.randomChoice([-1, 0, 1]), level, level + 2)
+					addQuestion createQuestion(newDifficulty, level), true
 		else
 			oldColor = question.backgroundColor
 			question.backgroundColor = incorrectColor
@@ -443,6 +441,11 @@ setGameState = (newGameState) ->
 			addQuestion createQuestion(currentLevel, currentLevel)
 
 		when "levelComplete"
+			# Give rewards for all remaining unanswered questions.
+			for question in questions
+				if not question.isAnswered
+					question.giveRewards()
+		
 			levelRootLayer.visible = false
 			levelCompleteLayer.visible = true
 			gameOverLayer.visible = false
