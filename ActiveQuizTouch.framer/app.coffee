@@ -169,40 +169,29 @@ createQuestion = (difficulty, level) ->
 		width: Screen.width
 		height: questionNumberHeight
 	
-	highlightLayer = new Layer
+	selectionHighlightLayer = new Layer
 		parent: question
 		backgroundColor: selectColor
 		width: 0
-		height: 100
-
-	question.setSelected = (selected) ->
+		height: question.height
 		
-		if question.isAnswered
-			question.backgroundColor = correctColor
-			highlightLayer.animate
-				properties:
-					height: 0
-					y: questionNumberHeight
-				curve: "ease-in-out"
-				time: 0.3
-			
-		else if selected
-			highlightLayer.height = questionNumberHeight
-			highlightLayer.y = 0
-			highlightLayer.animate
+	question.setSelected = (selected) ->
+		if selected
+			selectionHighlightLayer.height = questionNumberHeight
+			selectionHighlightLayer.y = 0
+			selectionHighlightLayer.animate
 				properties:
 					width: Screen.width
 				curve: "ease-in-out"
 				time: 0.35
 		else
-			highlightLayer.height = questionNumberHeight
-			highlightLayer.y = 0
-			highlightLayer.animate
+			selectionHighlightLayer.height = questionNumberHeight
+			selectionHighlightLayer.y = 0
+			selectionHighlightLayer.animate
 				properties:
 					width: 0
 				curve: "ease-in-out"
 				time: 0.2
-			question.backgroundColor = whiteColor
 		question.answerLayer.text = "" if not selected and not question.isAnswered
 	question.onTap ->
 		return if question.isAnswered
@@ -211,10 +200,7 @@ createQuestion = (difficulty, level) ->
 		question.updatePendingNumber
 			number: null
 			sign: 1
-			
-# 		for questionNumber in [0...question.problem.questionsRevealed]
-# 				addQuestion createQuestion(difficulty, level), true
-			
+						
 	question.problem = generateProblem(difficulty, level)
 	
 	question.isAnswered = false
@@ -280,6 +266,18 @@ createQuestion = (difficulty, level) ->
 			question.giveRewards()
 			setSelectedQuestion null
 			
+			correctHighlightLayer = new Layer
+				parent: question
+				backgroundColor: correctColor
+				width: question.width
+				height: 0
+				y: 0
+			correctHighlightLayer.placeBefore(selectionHighlightLayer)
+			correctHighlightLayer.animate
+				properties:
+					height: question.height
+				time: 0.2
+			
 			if question.isExit
 				setGameState "levelComplete"
 			else
@@ -295,22 +293,27 @@ createQuestion = (difficulty, level) ->
 					newDifficulty = clip(difficulty + Utils.randomChoice([-1, 0, 1]), level, level + 2)
 					addQuestion createQuestion(newDifficulty, level), true
 		else
-			oldColor = question.backgroundColor
-			question.backgroundColor = incorrectColor
-			highlightLayer.animate
+			incorrectHighlightLayer = new Layer
+				parent: question
+				backgroundColor: incorrectColor
+				width: question.width
+				height: 0
+				y: question.height
+			incorrectHighlightLayer.placeBefore(selectionHighlightLayer)
+				
+			incorrectHighlightLayerAnimation = new Animation
+				layer: incorrectHighlightLayer
+				time: 0.2
 				properties:
-					height: 0
-				curve: "ease-in-out"
-				time: 0.3
-
-# 			if true
-# 				question.animate
-# 					properties:
-# 						backgroundColor: selectColor
-# 					delay: 0.75
-# 					time: 2.0
-# 			else 
-# 				question.backgroundColor = whiteColor
+					height: question.height
+					y: 0
+			 
+			# After a little bit, reverse the animation.
+			setTimeout(->
+				incorrectHighlightLayerAnimation.reverse().start() 
+			, 700) # in milliseconds
+			incorrectHighlightLayerAnimation.start()
+			
 			question.ghostifyAnswer()
 		
 	return question	
