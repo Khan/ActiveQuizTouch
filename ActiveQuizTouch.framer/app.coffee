@@ -234,6 +234,14 @@ createQuestion = (difficulty, level) ->
 	question.answerLayer.midY = question.height / 2
 	question.answerLayer.text =  " " 
 	question.answerBuffer = {number: null, sign: 1}
+	
+	rewardDebugLayer = new TextLayer
+		parent: question
+		x: 30
+		y: 70
+		autoSize: true
+		color: "black"
+	rewardDebugLayer.text = "#{question.problem.reward.count} #{if question.problem.reward.type == "points" then "points" else "seconds"}; #{question.problem.questionsRevealed} question revealed"
 		
 	question.updatePendingNumber = (newAnswerBuffer) ->
 		question.answerBuffer = newAnswerBuffer
