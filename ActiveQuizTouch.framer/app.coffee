@@ -130,10 +130,10 @@ questionScrollComponent = new ScrollComponent
 noSelectionKeyboardOverlay = null # Assigned later, in keyboard section. Annoying that Framer won't let you reference functions top-level variables that are defined later in the file.
 
 selectedQuestion = null
-setSelectedQuestion = (newSelectedQuestion) -> 
-	selectedQuestion?.setSelected false
+setSelectedQuestion = (newSelectedQuestion, animated) -> 
+	selectedQuestion?.setSelected false, animated
 	selectedQuestion = newSelectedQuestion
-	newSelectedQuestion?.setSelected true
+	newSelectedQuestion?.setSelected true, animated
 	noSelectionKeyboardOverlay?.setVisible (if newSelectedQuestion then false else true)
 	
 questions = []
@@ -175,7 +175,7 @@ createQuestion = (difficulty, level) ->
 		width: 0
 		height: question.height
 		
-	question.setSelected = (selected) ->
+	question.setSelected = (selected, animated) ->
 		if selected
 			selectionHighlightLayer.height = questionNumberHeight
 			selectionHighlightLayer.y = 0
@@ -183,7 +183,7 @@ createQuestion = (difficulty, level) ->
 				properties:
 					width: Screen.width
 				curve: "ease-in-out"
-				time: 0.35
+				time: if animated then 0.35 else 0
 		else
 			selectionHighlightLayer.height = questionNumberHeight
 			selectionHighlightLayer.y = 0
@@ -191,16 +191,17 @@ createQuestion = (difficulty, level) ->
 				properties:
 					width: 0
 				curve: "ease-in-out"
-				time: 0.2
+				time: if animated then 0.2 else 0
 		question.answerLayer.text = "" if not selected and not question.isAnswered
+		
 	question.onTap ->
 		return if question.isAnswered
-			
-		setSelectedQuestion question	
+		
+		setSelectedQuestion question
 		question.updatePendingNumber
 			number: null
 			sign: 1
-						
+			
 	question.problem = generateProblem(difficulty, level)
 	
 	question.isAnswered = false
@@ -264,7 +265,7 @@ createQuestion = (difficulty, level) ->
 		if isCorrect
 			question.isAnswered = true
 			question.giveRewards()
-			setSelectedQuestion null
+			setSelectedQuestion null, true
 			
 			correctHighlightLayer = new Layer
 				parent: question
@@ -421,7 +422,7 @@ setGameState = (newGameState) ->
 			setGameState "level"
 			
 		when "level"
-			setSelectedQuestion null
+			setSelectedQuestion null, false
 		
 			for question in questions
 				question.destroy()
@@ -436,7 +437,7 @@ setGameState = (newGameState) ->
 			# We may want to add multiple questions at the start of a level in the future: this is where we'd do that!
 			initialQuestion = createQuestion(currentLevel, currentLevel)
 			addQuestion initialQuestion
-			setSelectedQuestion initialQuestion
+			setSelectedQuestion initialQuestion, false
 
 		when "levelComplete"
 			# Give rewards for all remaining unanswered questions.
