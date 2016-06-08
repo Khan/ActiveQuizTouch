@@ -134,12 +134,8 @@ setSelectedQuestion = (newSelectedQuestion) ->
 	selectedQuestion?.setSelected false
 	selectedQuestion = newSelectedQuestion
 	newSelectedQuestion?.setSelected true
+	noSelectionKeyboardOverlay?.setVisible (if newSelectedQuestion then false else true)
 	
-	noSelectionKeyboardOverlay?.animate
-		properties:
-			opacity: if newSelectedQuestion then 0 else 1
-		time: 0.2
-
 questions = []
 
 addQuestion = (newQuestion, animate) ->
@@ -583,15 +579,30 @@ noSelectionKeyboardOverlay = new Layer
 	x: keyboard.x
 	y: keyboard.y
 	backgroundColor: "rgba(216,216,216,1)"
-newSelectionKeyboardOverlayLabel = new TextLayer
+noop = (event) -> return
+noSelectionKeyboardOverlay.setVisible = (isVisible) ->
+	if isVisible
+		noSelectionKeyboardOverlay.visible = true
+	
+	animationLengthInSeconds = 0.2
+	noSelectionKeyboardOverlay?.animate
+		properties:
+			opacity: if isVisible then 1 else 0
+		time: animationLengthInSeconds
+	if not isVisible
+		setTimeout(->
+			noSelectionKeyboardOverlay.visible = false
+		, animationLengthInSeconds * 1000)
+
+noSelectionKeyboardOverlayLabel = new TextLayer
 	parent: noSelectionKeyboardOverlay
 	text: "Select a question"
 	autoSize: true
 	color: darkGray
 	fontFamily: "Proxima Nova"
 	fontSize: 48
-newSelectionKeyboardOverlayLabel.midX = keyboard.midX
-newSelectionKeyboardOverlayLabel.midY = keyboard.height / 2
+noSelectionKeyboardOverlayLabel.midX = keyboard.midX
+noSelectionKeyboardOverlayLabel.midY = keyboard.height / 2
 
 #==========================================
 # Start!!
