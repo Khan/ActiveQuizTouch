@@ -434,7 +434,10 @@ setGameState = (newGameState) ->
 			
 			exitQuestionIndex = Math.round(Utils.randomNumber(Math.floor(maximumNumberOfProblems(currentLevel) / 2), maximumNumberOfProblems(currentLevel) - 1))
 
-			addQuestion createQuestion(currentLevel, currentLevel)
+			# We may want to add multiple questions at the start of a level in the future: this is where we'd do that!
+			initialQuestion = createQuestion(currentLevel, currentLevel)
+			addQuestion initialQuestion
+			setSelectedQuestion initialQuestion
 
 		when "levelComplete"
 			# Give rewards for all remaining unanswered questions.
@@ -460,8 +463,6 @@ setGameState = (newGameState) ->
 			gameOverScoreLabel.text = "Your score: " + points + " points"
 			gameOverScoreLabel.midX = gameOverLayer.midX
 	gameState = newGameState
-
-setGameState "newGame"
 
 #==========================================
 # Answer Input
@@ -591,3 +592,8 @@ newSelectionKeyboardOverlayLabel = new TextLayer
 	fontSize: 48
 newSelectionKeyboardOverlayLabel.midX = keyboard.midX
 newSelectionKeyboardOverlayLabel.midY = keyboard.height / 2
+
+#==========================================
+# Start!!
+
+setGameState "newGame"
