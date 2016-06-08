@@ -28,6 +28,13 @@ whiteColor = "white"
 yellowColor = "yellow"
 transparent = "rgba(0,0,0,0)"
 
+fontFamily = "ProximaNovaRegular"
+
+customFontStyle = document.createElement("style")
+customFontCSS = "@font-face{font-family:#{fontFamily};src:url(ProximaNova-Reg-webfont.ttf);}"
+customFontStyle.appendChild(document.createTextNode(customFontCSS))
+document.head.appendChild(customFontStyle)
+
 # Sizes of things
 
 questionPromptSize = 48
@@ -349,7 +356,7 @@ createButton = (text, action) ->
 	buttonLabel = new TextLayer
 		parent: button
 		fontSize: 48
-		fontFamily: "Proxima Nova"
+		fontFamily: fontFamily
 		color: "black"
 		autoSize: true
 		text: text
@@ -369,7 +376,7 @@ levelCompleteLabel = new TextLayer
 	color: "white"
 	y: 300
 	autoSize: true
-	fontFamily: "Proxima Nova"
+	fontFamily: fontFamily
 	fontSize: 80
 
 levelCompleteScoreLabel = new TextLayer
@@ -377,7 +384,7 @@ levelCompleteScoreLabel = new TextLayer
 	color: "white"
 	y: 500
 	autoSize: true
-	fontFamily: "Proxima Nova"
+	fontFamily: fontFamily
 	fontSize: 48
 	
 nextLevelButton = createButton "Next level", ->
@@ -399,7 +406,7 @@ gameOverLabel = new TextLayer
 	y: 300
 	autoSize: true
 	text: "Game Over!"
-	fontFamily: "Proxima Nova"
+	fontFamily: fontFamily
 	fontSize: 80
 gameOverLabel.midX = gameOverLayer.midX
 
@@ -408,7 +415,7 @@ gameOverScoreLabel = new TextLayer
 	color: "white"
 	y: 500
 	autoSize: true
-	fontFamily: "Proxima Nova"
+	fontFamily: fontFamily
 	fontSize: 48
 	
 retryButton = createButton "Play again", ->
@@ -530,7 +537,7 @@ for column in [0..3]
 			parent: key
 			autoSize: true
 			fontSize: 48
-			fontFamily: "Proxima Nova"
+			fontFamily: fontFamily
 		
 		if column < 3 && row < 3
 			do (digit = row * 3 + column + 1) ->
@@ -611,7 +618,7 @@ noSelectionKeyboardOverlayLabel = new TextLayer
 	text: "Select a question"
 	autoSize: true
 	color: darkGray
-	fontFamily: "Proxima Nova"
+	fontFamily: fontFamily
 	fontSize: 48
 noSelectionKeyboardOverlayLabel.midX = keyboard.midX
 noSelectionKeyboardOverlayLabel.midY = keyboard.height / 2
