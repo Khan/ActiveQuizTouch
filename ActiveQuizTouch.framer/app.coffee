@@ -272,7 +272,7 @@ createQuestion = (difficulty, level) ->
 		y: 70
 		autoSize: true
 		color: "black"
-	rewardDebugLayer.text = "#{question.problem.reward.count} #{if question.problem.reward.type == "points" then "points" else "seconds"}; #{question.problem.questionsRevealed} question revealed"
+	rewardDebugLayer.text = "#{question.problem.reward.count} #{if question.problem.reward.type == "points" then "points" else "time units"}; #{question.problem.questionsRevealed} question revealed"
 		
 	question.updatePendingNumber = (newAnswerBuffer) ->
 		question.answerBuffer = newAnswerBuffer
@@ -293,7 +293,8 @@ createQuestion = (difficulty, level) ->
 			when "points"
 				setPoints points + question.problem.reward.count
 			when "time"
-				addTime question.problem.reward.count
+				# Give 3 seconds per "time unit".
+				addTime question.problem.reward.count * 3
 
 
 	question.submit = ->
