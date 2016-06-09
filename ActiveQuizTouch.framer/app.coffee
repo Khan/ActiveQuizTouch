@@ -9,6 +9,7 @@ setGameState = null # Defined later; working around Framer definition ordering i
 levelRootLayer = new Layer
 	width: Screen.width
 	height: Screen.height
+	backgroundColor: ""
 	
 clip = (value, min, max) ->
 	Math.max(min, Math.min(max, value))
@@ -34,6 +35,12 @@ customFontStyle = document.createElement("style")
 customFontCSS = "@font-face{font-family:#{fontFamily};src:url(ProximaNova-Reg-webfont.ttf);}"
 customFontStyle.appendChild(document.createTextNode(customFontCSS))
 document.head.appendChild(customFontStyle)
+
+background = new Layer
+	width: Screen.width,
+	height: Screen.height
+background.style.background = "linear-gradient(to bottom, #031B3C, #5FA9B4)"
+background.sendToBack()
 
 # Sizes of things
 
