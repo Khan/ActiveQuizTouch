@@ -107,7 +107,7 @@ allOperators = [
 ]
 
 generateProblem = (difficulty, level) ->
-	maxOperatorIndex = Math.floor(Math.min(difficulty / 2, 2))
+	maxOperatorIndex = Math.floor(clip(difficulty / 2 - 1, 0, 2))
 	numberOfOperators = (Math.floor(difficulty / 2) % 3) + 1
 	maxOperandValue = (Math.floor(difficulty / 6) * 10) + 10
 	numberOfOperands = numberOfOperators + 1
@@ -272,7 +272,7 @@ createQuestion = (difficulty, level) ->
 		y: 70
 		autoSize: true
 		color: "black"
-	rewardDebugLayer.text = "#{question.problem.reward.count} #{if question.problem.reward.type == "points" then "points" else "time units"}; #{question.problem.questionsRevealed} question revealed"
+	rewardDebugLayer.text = "#{question.problem.reward.count} #{if question.problem.reward.type == "points" then "points" else "time units"}; #{question.problem.questionsRevealed} question revealed; difficulty = #{difficulty}"
 		
 	question.updatePendingNumber = (newAnswerBuffer) ->
 		question.answerBuffer = newAnswerBuffer
