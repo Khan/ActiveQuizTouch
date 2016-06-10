@@ -53,7 +53,7 @@ background.sendToBack()
 # Sizes of things
 
 questionWidthUnselected = 195 * 2
-questionWidthSelected = 222 * 2
+questionWidthSelected = 245 * 2
 questionHeightUnselected = 55 * 2
 questionHeightSelected = 61 * 2
 
@@ -263,6 +263,12 @@ createQuestion = (difficulty, level) ->
 					x: newPromptLayerX + question.promptLayer.width + questionPromptEqualsSignSpacing
 					opacity: 1
 				time: time
+				
+			question.answerLayer.animate
+				properties:
+					x: newPromptLayerX + question.promptLayer.width + questionPromptEqualsSignSpacing + question.equalsLabel.width + questionPromptEqualsSignSpacing
+					opacity: 1
+				time: time
 		else
 			time = if animated then 0.1 else 0
 			questionBorder.animate
@@ -274,7 +280,7 @@ createQuestion = (difficulty, level) ->
 					height: questionHeightUnselected
 					x: 0
 					y: 0
-					shadowColor: "rgba(0,0,0,0)"
+					shadowColor: transparent
 				time: time
 			question.promptLayer.animate
 				properties:
@@ -283,6 +289,11 @@ createQuestion = (difficulty, level) ->
 			question.equalsLabel.animate
 				properties:
 					x: questionLeftPadding + question.promptLayer.width + questionPromptEqualsSignSpacing
+					opacity: 0
+				time: time
+			question.answerLayer.animate
+				properties:
+					x: questionLeftPadding + question.promptLayer.width + questionPromptEqualsSignSpacing + question.equalsLabel.width + questionPromptEqualsSignSpacing
 					opacity: 0
 				time: time
 		question.answerLayer.text = "" if not selected and not question.isAnswered
@@ -319,19 +330,19 @@ createQuestion = (difficulty, level) ->
 		opacity: 0
 		x: question.promptLayer.maxX + questionPromptEqualsSignSpacing
 		
-	question.answerLayer = new TextLayer
-		x: 400
-		width: 304
-		autoSize: true
-		height: questionHeightUnselected
-		fontSize: questionPromptSize
-		color: incorrectColor
-		backgroundColor: transparent
+	question.answerLayer = question.promptLayer.copy()
+	question.answerLayer.props =
 		parent: question
+		autoSize: false
+		opacity: 0
 		text: "foo"
 	# this is dumb but if we don't do this then the answerLayer size is technically still 0 and we can't move its midpoint
+	question.answerLayer.calcSize()
 	question.answerLayer.midY = question.height / 2
-	question.answerLayer.text =  " " 
+	question.answerLayer.x = question.equalsLabel.maxX + questionPromptEqualsSignSpacing
+	question.answerLayer.width = 95*2
+	question.answerLayer.text = " "
+	question.answerLayer.style["border-bottom"] = "6px solid white"
 	question.answerBuffer = {number: null, sign: 1}
 	
 	rewardDebugLayer = new TextLayer
@@ -344,7 +355,7 @@ createQuestion = (difficulty, level) ->
 		
 	question.updatePendingNumber = (newAnswerBuffer) ->
 		question.answerBuffer = newAnswerBuffer
-		question.answerLayer.color = darkGray
+		question.answerLayer.color = whiteColor
 		if newAnswerBuffer.number == 0
 			question.answerLayer.text = if newAnswerBuffer.sign == 1 then "0" else "-0"
 		else if newAnswerBuffer.number == null
@@ -353,7 +364,7 @@ createQuestion = (difficulty, level) ->
 			question.answerLayer.text = newAnswerBuffer.number * newAnswerBuffer.sign
 			
 	question.ghostifyAnswer = ->
-		question.answerLayer.color = medGray
+		question.answerLayer.color = "rgba(255, 255, 255, 0.4)"
 		question.answerBuffer = {number: null, sign: 1}
 		
 	question.giveRewards = ->
@@ -382,7 +393,6 @@ createQuestion = (difficulty, level) ->
 				height: 0
 				y: 0
 				borderRadius: question.borderRadius
-			correctHighlightLayer.placeBefore(selectionHighlightLayer)
 			correctHighlightLayer.animate
 				properties:
 					height: question.height
@@ -411,7 +421,6 @@ createQuestion = (difficulty, level) ->
 				height: 0
 				y: question.height
 				borderRadius: question.borderRadius
-			incorrectHighlightLayer.placeBefore(selectionHighlightLayer)
 				
 			incorrectHighlightLayerAnimation = new Animation
 				layer: incorrectHighlightLayer
