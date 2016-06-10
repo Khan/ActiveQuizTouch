@@ -47,7 +47,7 @@ document.head.appendChild(customFontStyle)
 background = new Layer
 	width: Screen.width,
 	height: Screen.height
-background.style.background = "linear-gradient(to bottom, #031B3C, #5FA9B4)"
+background.style.background = "linear-gradient(to bottom, #5FA9B4, #04007B)"
 background.sendToBack()
 
 # Sizes of things
