@@ -306,6 +306,13 @@ createQuestion = (difficulty, level) ->
 	question.isAnswered = false
 	
 	question.markAsExitQuestion = ->
+		dot.destroy() for dot in question.revealedQuestionContainer.subLayers
+		exitIndicator = new Layer
+			parent: question.revealedQuestionContainer
+			width: 226
+			height: 110
+			x: -question.questionBorder.borderRadius
+			image: "images/ExitIndicator@2x.png"
 		question.isExit = true
 			
 	question.promptLayer = new TextLayer
@@ -684,7 +691,7 @@ for column in [0..3]
 			normal:
 				if column == 3
 					backgroundColor: "rgba(240, 241, 242, 0.4)"
-				else 
+				else
 					backgroundColor: "rgba(240, 241, 242, 0.5)"
 		key.onTouchStart (event, layer) ->
 			layer.states.switch "highlight", time: 0.1, curve: "easeout"
