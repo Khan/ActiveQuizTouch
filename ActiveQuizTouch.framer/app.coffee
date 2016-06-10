@@ -63,6 +63,7 @@ questionBorderWidthSelected = 3 * 2
 questionPromptSize = 28*2
 questionNumberSpacing = 14*2
 questionLeftPadding = 25*2
+questionPromptEqualsSignSpacing = 15
 
 #==========================================
 # Points
@@ -251,9 +252,16 @@ createQuestion = (difficulty, level) ->
 					y: -(questionHeightSelected - questionHeightUnselected) / 2
 					shadowColor: whiteColor
 				time: time
+			newPromptLayerX = questionLeftPadding - (questionWidthSelected - questionWidthUnselected) / 2
 			question.promptLayer.animate
 				properties:
-					x: questionLeftPadding - (questionWidthSelected - questionWidthUnselected) / 2
+					x: newPromptLayerX
+				time: time
+				
+			question.equalsLabel.animate
+				properties:
+					x: newPromptLayerX + question.promptLayer.width + questionPromptEqualsSignSpacing
+					opacity: 1
 				time: time
 		else
 			time = if animated then 0.1 else 0
@@ -271,6 +279,11 @@ createQuestion = (difficulty, level) ->
 			question.promptLayer.animate
 				properties:
 					x: questionLeftPadding
+				time: time
+			question.equalsLabel.animate
+				properties:
+					x: questionLeftPadding + question.promptLayer.width + questionPromptEqualsSignSpacing
+					opacity: 0
 				time: time
 		question.answerLayer.text = "" if not selected and not question.isAnswered
 		
@@ -298,6 +311,13 @@ createQuestion = (difficulty, level) ->
 		parent: question
 		text: question.problem.label
 	question.promptLayer.midY = question.height / 2
+	
+	question.equalsLabel = question.promptLayer.copy()
+	question.equalsLabel.props =
+		parent: question
+		text: "="
+		opacity: 0
+		x: question.promptLayer.maxX + questionPromptEqualsSignSpacing
 		
 	question.answerLayer = new TextLayer
 		x: 400
