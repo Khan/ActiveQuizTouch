@@ -1,8 +1,9 @@
 {TextLayer} = require 'TextLayer'
 
 # Set this to true to cause many questions to be spawned when the level starts.
-debugShouldSpawnManyQuestions = false
+debugShouldSpawnManyQuestions = true
 
+#==========================================
 # Initial state 
 
 points = 0
@@ -18,6 +19,7 @@ levelRootLayer = new Layer
 clip = (value, min, max) ->
 	Math.max(min, Math.min(max, value))
 
+#==========================================
 # Style Stuffz
 
 # Color Palette
@@ -61,6 +63,7 @@ questionBorderWidthSelected = 3 * 2
 questionPromptSize = 48
 questionNumberSpacing = 2
 
+#==========================================
 # Points
 
 pointsDisplay = new TextLayer
@@ -74,6 +77,7 @@ setPoints = (newPoints) ->
 	points = newPoints
 setPoints(0)
 
+#==========================================
 # Timer
 
 startingClockTimeInSeconds = 60
@@ -117,6 +121,7 @@ requestAnimationFrame updateTimer
 addTime = (extraSeconds) ->
 	endTime += extraSeconds * 1000
 
+#==========================================
 # Problem Generation
 
 allOperators = [
@@ -146,6 +151,7 @@ generateProblem = (difficulty, level) ->
 		type: if Math.random(1) > 0.33 then "points" else "time"
 	questionsRevealed: Utils.randomChoice([0, 1, 1, 2, 2, 2, 3])
 
+#==========================================
 # Game "board"
 
 maximumNumberOfProblems = (levelNumber) ->
@@ -208,6 +214,7 @@ updateQuestionLayout = (animated) ->
 		questionScrollComponent.updateContent() # Resize the scrollable bounds of the question scroll component according to the new layout
 	, (delay + 0.2) * 1000)
 
+#==========================================
 # Question Cells
 
 createQuestion = (difficulty, level) ->
@@ -399,6 +406,7 @@ createQuestion = (difficulty, level) ->
 		
 	return question	
 
+#==========================================
 # UI button
 
 createButton = (text, action) ->
@@ -428,6 +436,7 @@ createButton = (text, action) ->
 	buttonLabel.midY = button.height / 2
 	return button
 
+#==========================================
 # Level complete UI
 
 levelCompleteLayer = new Layer
@@ -456,6 +465,7 @@ nextLevelButton = createButton "Next level", ->
 nextLevelButton.parent = levelCompleteLayer
 nextLevelButton.y = 700
 
+#==========================================
 # Game over UI
 
 gameOverLayer = new Layer
@@ -485,6 +495,7 @@ retryButton = createButton "Play again", ->
 retryButton.parent = gameOverLayer
 retryButton.y = 700
 
+#==========================================
 # Game state
 
 setGameState = (newGameState) ->
@@ -547,11 +558,13 @@ setGameState = (newGameState) ->
 			gameOverScoreLabel.midX = gameOverLayer.midX
 	gameState = newGameState
 
+#==========================================
 # Answer Input
 
 updatePendingNumber = (updateFunction) ->
 	selectedQuestion.updatePendingNumber updateFunction(selectedQuestion.answerBuffer)
 
+#==========================================
 # Keyboard
 
 keyboardHeight = 432
