@@ -1,5 +1,8 @@
 {TextLayer} = require 'TextLayer'
 
+# Set this to true to cause many questions to be spawned when the level starts.
+debugShouldSpawnManyQuestions = false
+
 # Initial state 
 
 points = 0
@@ -24,10 +27,13 @@ lightGray = "rgba(227,229,230,1)"
 darkGray = "rgba(98,101,105,1)"
 correctColor = "rgba(116,207,112,1)"
 incorrectColor = "rgba(255,132,130,1)"
-selectColor = "rgba(157,243,255,1)"
+selectColor = "rgba(157,243,255,1)" # TODO(andy): unused after redesign?
 whiteColor = "white"
 yellowColor = "yellow"
 transparent = "rgba(0,0,0,0)"
+
+questionBorderColorSelected = whiteColor
+questionBorderColorUnselected = "rgba(250, 250, 250, 0.8)"
 
 fontFamily = "ProximaNovaRegular"
 
@@ -48,6 +54,9 @@ questionWidthUnselected = 195 * 2
 questionWidthSelected = 222 * 2
 questionHeightUnselected = 55 * 2
 questionHeightSelected = 61 * 2
+
+questionBorderWidthUnselected = 1
+questionBorderWidthSelected = 3 * 2
 
 questionPromptSize = 48
 questionNumberSpacing = 2
@@ -207,40 +216,58 @@ createQuestion = (difficulty, level) ->
 		backgroundColor: ""
 		width: questionWidthUnselected
 		height: questionHeightUnselected
-		borderColor: whiteColor
 		borderRadius: questionHeightUnselected / 2
-		borderWidth: 1
-	
-	selectionHighlightLayer = new Layer
+		
+	questionBorder = new Layer
 		parent: question
-		backgroundColor: selectedQuestion
-		width: 0
+		borderColor: questionBorderColorUnselected
+		borderRadius: questionHeightUnselected / 2
+		borderWidth: questionBorderWidthUnselected
+		shadowBlur: 22*2
+		shadowSpread: 4*2
+		width: question.width
 		height: question.height
-		borderRadius: question.borderRadius
+		backgroundColor: ""
 		
 	question.setSelected = (selected, animated) ->
 		if selected
-			selectionHighlightLayer.height = questionHeightUnselected
-			selectionHighlightLayer.y = 0
-			selectionHighlightLayer.animate
+			time = if animated then 0.15 else 0
+			question.animate
 				properties:
-					width: question.width
-				curve: "ease-in-out"
-				time: if animated then 0.35 else 0
+					width: questionWidthSelected
+					height: questionHeightSelected
+				time: time
+			questionBorder.animate
+				properties:
+					borderWidth: questionBorderWidthSelected
+					borderColor: questionBorderColorSelected
+					borderRadius: questionHeightSelected / 2
+					width: questionWidthSelected
+					height: questionHeightSelected
+					shadowColor: whiteColor
+				time: time
 		else
-			selectionHighlightLayer.height = questionHeightUnselected
-			selectionHighlightLayer.y = 0
-			selectionHighlightLayer.animate
+			time = if animated then 0.1 else 0
+			question.animate
 				properties:
-					width: 0
-				curve: "ease-in-out"
-				time: if animated then 0.2 else 0
+					width: questionWidthUnselected
+					height: questionHeightUnselected
+				time: time
+			questionBorder.animate
+				properties:
+					borderWidth: questionBorderWidthUnselected
+					borderColor: questionBorderColorUnselected
+					borderRadius: questionHeightUnselected / 2
+					width: questionWidthUnselected
+					height: questionHeightUnselected
+					shadowColor: "rgba(0,0,0,0)"
+				time: time
 		question.answerLayer.text = "" if not selected and not question.isAnswered
 		
 	question.onTap ->
 		return if question.isAnswered
 		
-		setSelectedQuestion question
+		setSelectedQuestion question, true
 		question.updatePendingNumber
 			number: null
 			sign: 1
@@ -487,6 +514,9 @@ setGameState = (newGameState) ->
 			initialQuestion = createQuestion(currentLevel, currentLevel)
 			addQuestion initialQuestion
 			setSelectedQuestion initialQuestion, false
+			
+			if debugShouldSpawnManyQuestions
+				addQuestion createQuestion(currentLevel, currentLevel) for _ in [0..5]
 			
 			unpause()
 
