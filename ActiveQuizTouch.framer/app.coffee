@@ -65,6 +65,8 @@ questionNumberSpacing = 14*2
 questionLeftPadding = 25*2
 questionPromptEqualsSignSpacing = 15
 
+keyboardHeight = 432
+
 #==========================================
 # Points
 
@@ -270,7 +272,7 @@ createQuestion = (difficulty, level) ->
 		else
 			time = if animated then 0.1 else 0
 			questionInterior.animate
-				properties: {x: -(questionWidthSelected - questionWidthUnselected) / 2}
+				properties: {x: 0}
 				time: time
 			questionBorder.animate
 				properties:
@@ -344,6 +346,19 @@ createQuestion = (difficulty, level) ->
 		autoSize: true
 		color: "black"
 	rewardDebugLayer.text = "#{question.problem.reward.count} #{if question.problem.reward.type == "points" then "points" else "time units"}; #{question.problem.questionsRevealed} question revealed; difficulty = #{difficulty}"
+	
+	rewardX = 0
+	for rewardIndex in [0...question.problem.reward.count]
+		size = 45*2 - rewardIndex*10*2
+		rewardX -= (size - 11*2)
+		rewardLayer = new Layer
+			parent: questionInterior
+			width: size
+			height: size
+			borderWidth: size/2
+			x: rewardX
+		rewardLayer.midY = questionInterior.height / 2
+			
 		
 	question.updatePendingNumber = (newAnswerBuffer) ->
 		question.answerBuffer = newAnswerBuffer
@@ -552,7 +567,7 @@ setGameState = (newGameState) ->
 			setSelectedQuestion initialQuestion, false
 			
 			if debugShouldSpawnManyQuestions
-				addQuestion createQuestion(currentLevel, currentLevel) for _ in [0..5]
+				addQuestion createQuestion(currentLevel + Utils.randomChoice([0, 1, 2]), currentLevel) for _ in [0..5]
 			
 			unpause()
 
@@ -592,13 +607,22 @@ updatePendingNumber = (updateFunction) ->
 #==========================================
 # Keyboard
 
-keyboardHeight = 432
 keyboard = new Layer
 	parent: levelRootLayer
 	y: Screen.height - keyboardHeight
 	width: Screen.width
 	height: keyboardHeight
 	backgroundColor: ""
+blurStyle = "blur(50px)"
+keyboard.style["-webkit-backdrop-filter"] = blurStyle
+if !CSS.supports("-webkit-backdrop-filter", blurStyle)
+	# Can't scroll under the keyboard if we don't have backdrops.
+	newInset = 110
+	questionScrollComponent.height -= keyboardHeight
+	questionScrollComponent.contentInset = 
+		top: questionScrollComponent.contentInset.top
+		bottom: newInset
+	questionScrollComponent.updateContent()
 
 keyWidth = Screen.width / 4
 keyHeight = keyboardHeight / 4
@@ -692,8 +716,6 @@ for column in [0..3]
 			key.width = keyWidth * 2 - keySpacing
 			
 		keyLabel.center()
-
-questionScrollComponent.height -= keyboardHeight
 
 noSelectionKeyboardOverlay = new Layer
 	parent: levelRootLayer
