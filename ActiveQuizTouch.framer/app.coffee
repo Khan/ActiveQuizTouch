@@ -55,6 +55,7 @@ background.sendToBack()
 # Sizes of things
 
 questionWidthUnselected = 195 * 2
+questionWidthSelected = 225 * 2
 questionHeightUnselected = 55 * 2
 questionHeightSelected = 61 * 2
 
@@ -236,7 +237,7 @@ createQuestion = (difficulty, level) ->
 	question.setSelected = (selected, animated) ->
 		if selected
 			time = if animated then 0.15 else 0
-			newQuestionWidth = Math.max(question.answerLayer.maxX + questionLeftPadding, questionWidthUnselected)
+			newQuestionWidth = Math.max(question.answerLayer.maxX + questionLeftPadding, questionWidthSelected)
 			
 			questionInterior.animate
 				properties: {x: -(newQuestionWidth - questionWidthUnselected) / 2}
@@ -260,8 +261,14 @@ createQuestion = (difficulty, level) ->
 			question.answerLayer.animate
 				properties: {opacity: 1}
 				time: time
+				
+			question.revealedQuestionContainer.animate
+				properties: {x: newQuestionWidth}
+				time: time
 		else
 			time = if animated then 0.1 else 0
+			newQuestionWidth = questionWidthUnselected
+			
 			questionInterior.animate
 				properties: {x: 0}
 				time: time
@@ -270,7 +277,7 @@ createQuestion = (difficulty, level) ->
 					borderWidth: questionBorderWidthUnselected
 					borderColor: questionBorderColorUnselected
 					borderRadius: questionHeightUnselected / 2
-					width: questionWidthUnselected
+					width: newQuestionWidth
 					height: questionHeightUnselected
 					y: 0
 					shadowColor: "rgba(255,255,255,0)"
@@ -280,6 +287,9 @@ createQuestion = (difficulty, level) ->
 				time: time
 			question.answerLayer.animate
 				properties: {opacity: 0}
+				time: time
+			question.revealedQuestionContainer.animate
+				properties: {x: newQuestionWidth}
 				time: time
 		question.answerLayer.text = "" if not selected and not question.isAnswered
 		
@@ -329,14 +339,6 @@ createQuestion = (difficulty, level) ->
 	question.answerLayer.text = " "
 	question.answerLayer.style["border-bottom"] = "6px solid white"
 	question.answerBuffer = {number: null, sign: 1}
-		
-# 	rewardDebugLayer = new TextLayer
-# 		parent: questionInterior
-# 		x: 30
-# 		y: 70
-# 		autoSize: true
-# 		color: "black"
-# 	rewardDebugLayer.text = "#{question.problem.reward.count} #{if question.problem.reward.type == "points" then "points" else "time units"}; #{question.problem.questionsRevealed} question revealed; difficulty = #{difficulty}"
 	
 	# Make reward circles
 	rewardX = 0
@@ -354,19 +356,25 @@ createQuestion = (difficulty, level) ->
 		rewardLayer.midY = questionInterior.height / 2
 		
 	# Make revealed question circles
-	revealedQuestionX = questionInterior.width - 11*2
+	question.revealedQuestionContainer = new Layer
+		parent: questionInterior
+		backgroundColor: ""
+		x: questionInterior.width
+	question.revealedQuestionDots = []
+	revealedQuestionDotX = -11*2
 	for questionIndex in [0...question.problem.questionsRevealed]
 		size = 45*2 - questionIndex*10*2
 		revealedQuestionLayer = new Layer
-			parent: questionInterior
+			parent: question.revealedQuestionContainer
 			width: size
 			height: size
 			borderRadius: size/2
 			opacity: 0.6 - 0.2*questionIndex
 			backgroundColor: whiteColor
-			x: revealedQuestionX
+			x: revealedQuestionDotX
 		revealedQuestionLayer.midY = questionInterior.height / 2
-		revealedQuestionX += size - 11*2
+		revealedQuestionDotX += size - 11*2
+		question.revealedQuestionDots.push(revealedQuestionLayer)
 			
 	question.questionBorder = new Layer
 		parent: questionInterior
