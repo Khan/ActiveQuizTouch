@@ -60,8 +60,9 @@ questionHeightSelected = 61 * 2
 questionBorderWidthUnselected = 1
 questionBorderWidthSelected = 3 * 2
 
-questionPromptSize = 48
+questionPromptSize = 28*2
 questionNumberSpacing = 14*2
+questionLeftPadding = 25*2
 
 #==========================================
 # Points
@@ -250,6 +251,10 @@ createQuestion = (difficulty, level) ->
 					y: -(questionHeightSelected - questionHeightUnselected) / 2
 					shadowColor: whiteColor
 				time: time
+			question.promptLayer.animate
+				properties:
+					x: questionLeftPadding - (questionWidthSelected - questionWidthUnselected) / 2
+				time: time
 		else
 			time = if animated then 0.1 else 0
 			questionBorder.animate
@@ -262,6 +267,10 @@ createQuestion = (difficulty, level) ->
 					x: 0
 					y: 0
 					shadowColor: "rgba(0,0,0,0)"
+				time: time
+			question.promptLayer.animate
+				properties:
+					x: questionLeftPadding
 				time: time
 		question.answerLayer.text = "" if not selected and not question.isAnswered
 		
@@ -280,14 +289,15 @@ createQuestion = (difficulty, level) ->
 	question.markAsExitQuestion = ->
 		question.isExit = true
 			
-	questionPrompt = new TextLayer
-		x: 30
+	question.promptLayer = new TextLayer
+		x: questionLeftPadding
 		autoSize: true
 		fontSize: questionPromptSize
-		color: darkGray
+		fontFamily: fontFamily
+		color: whiteColor
 		parent: question
 		text: question.problem.label
-	questionPrompt.midY = question.height / 2
+	question.promptLayer.midY = question.height / 2
 		
 	question.answerLayer = new TextLayer
 		x: 400
