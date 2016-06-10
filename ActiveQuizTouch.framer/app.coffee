@@ -226,9 +226,12 @@ createQuestion = (difficulty, level) ->
 		backgroundColor: ""
 		width: questionWidthUnselected
 		height: questionHeightUnselected
+	
+	questionInterior = question.copy()
+	questionInterior.parent = question
 		
 	questionBorder = new Layer
-		parent: question
+		parent: questionInterior
 		borderColor: questionBorderColorUnselected
 		borderRadius: questionHeightUnselected / 2
 		borderWidth: questionBorderWidthUnselected
@@ -241,36 +244,34 @@ createQuestion = (difficulty, level) ->
 	question.setSelected = (selected, animated) ->
 		if selected
 			time = if animated then 0.15 else 0
+			
+			questionInterior.animate
+				properties: {x: -(questionWidthSelected - questionWidthUnselected) / 2}
+				time: time
+				
 			questionBorder.animate
 				properties:
 					borderWidth: questionBorderWidthSelected
 					borderColor: questionBorderColorSelected
 					borderRadius: questionHeightSelected / 2
+					y: -(questionHeightSelected - questionHeightUnselected) / 2
 					width: questionWidthSelected
 					height: questionHeightSelected
-					x: -(questionWidthSelected - questionWidthUnselected) / 2
-					y: -(questionHeightSelected - questionHeightUnselected) / 2
 					shadowColor: whiteColor
 				time: time
 			newPromptLayerX = questionLeftPadding - (questionWidthSelected - questionWidthUnselected) / 2
-			question.promptLayer.animate
-				properties:
-					x: newPromptLayerX
-				time: time
-				
 			question.equalsLabel.animate
-				properties:
-					x: newPromptLayerX + question.promptLayer.width + questionPromptEqualsSignSpacing
-					opacity: 1
+				properties: {opacity: 1}
 				time: time
 				
 			question.answerLayer.animate
-				properties:
-					x: newPromptLayerX + question.promptLayer.width + questionPromptEqualsSignSpacing + question.equalsLabel.width + questionPromptEqualsSignSpacing
-					opacity: 1
+				properties: {opacity: 1}
 				time: time
 		else
 			time = if animated then 0.1 else 0
+			questionInterior.animate
+				properties: {x: -(questionWidthSelected - questionWidthUnselected) / 2}
+				time: time
 			questionBorder.animate
 				properties:
 					borderWidth: questionBorderWidthUnselected
@@ -278,23 +279,14 @@ createQuestion = (difficulty, level) ->
 					borderRadius: questionHeightUnselected / 2
 					width: questionWidthUnselected
 					height: questionHeightUnselected
-					x: 0
 					y: 0
 					shadowColor: transparent
 				time: time
-			question.promptLayer.animate
-				properties:
-					x: questionLeftPadding
-				time: time
 			question.equalsLabel.animate
-				properties:
-					x: questionLeftPadding + question.promptLayer.width + questionPromptEqualsSignSpacing
-					opacity: 0
+				properties: {opacity: 0}
 				time: time
 			question.answerLayer.animate
-				properties:
-					x: questionLeftPadding + question.promptLayer.width + questionPromptEqualsSignSpacing + question.equalsLabel.width + questionPromptEqualsSignSpacing
-					opacity: 0
+				properties: {opacity: 0}
 				time: time
 		question.answerLayer.text = "" if not selected and not question.isAnswered
 		
@@ -319,20 +311,20 @@ createQuestion = (difficulty, level) ->
 		fontSize: questionPromptSize
 		fontFamily: fontFamily
 		color: whiteColor
-		parent: question
+		parent: questionInterior
 		text: question.problem.label
 	question.promptLayer.midY = question.height / 2
 	
 	question.equalsLabel = question.promptLayer.copy()
 	question.equalsLabel.props =
-		parent: question
+		parent: questionInterior
 		text: "="
 		opacity: 0
 		x: question.promptLayer.maxX + questionPromptEqualsSignSpacing
 		
 	question.answerLayer = question.promptLayer.copy()
 	question.answerLayer.props =
-		parent: question
+		parent: questionInterior
 		autoSize: false
 		opacity: 0
 		text: "foo"
@@ -344,9 +336,9 @@ createQuestion = (difficulty, level) ->
 	question.answerLayer.text = " "
 	question.answerLayer.style["border-bottom"] = "6px solid white"
 	question.answerBuffer = {number: null, sign: 1}
-	
+		
 	rewardDebugLayer = new TextLayer
-		parent: question
+		parent: questionInterior
 		x: 30
 		y: 70
 		autoSize: true
@@ -387,7 +379,7 @@ createQuestion = (difficulty, level) ->
 			setSelectedQuestion null, true
 			
 			correctHighlightLayer = new Layer
-				parent: question
+				parent: questionInterior
 				backgroundColor: correctColor
 				width: question.width
 				height: 0
@@ -415,7 +407,7 @@ createQuestion = (difficulty, level) ->
 				updateQuestionLayout true
 		else
 			incorrectHighlightLayer = new Layer
-				parent: question
+				parent: questionInterior
 				backgroundColor: incorrectColor
 				width: question.width
 				height: 0
