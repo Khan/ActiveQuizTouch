@@ -224,7 +224,6 @@ createQuestion = (difficulty, level) ->
 		backgroundColor: ""
 		width: questionWidthUnselected
 		height: questionHeightUnselected
-		borderRadius: questionHeightUnselected / 2
 		
 	questionBorder = new Layer
 		parent: question
@@ -240,11 +239,6 @@ createQuestion = (difficulty, level) ->
 	question.setSelected = (selected, animated) ->
 		if selected
 			time = if animated then 0.15 else 0
-			question.animate
-				properties:
-					width: questionWidthSelected
-					height: questionHeightSelected
-				time: time
 			questionBorder.animate
 				properties:
 					borderWidth: questionBorderWidthSelected
@@ -252,15 +246,12 @@ createQuestion = (difficulty, level) ->
 					borderRadius: questionHeightSelected / 2
 					width: questionWidthSelected
 					height: questionHeightSelected
+					x: -(questionWidthSelected - questionWidthUnselected) / 2
+					y: -(questionHeightSelected - questionHeightUnselected) / 2
 					shadowColor: whiteColor
 				time: time
 		else
 			time = if animated then 0.1 else 0
-			question.animate
-				properties:
-					width: questionWidthUnselected
-					height: questionHeightUnselected
-				time: time
 			questionBorder.animate
 				properties:
 					borderWidth: questionBorderWidthUnselected
@@ -268,6 +259,8 @@ createQuestion = (difficulty, level) ->
 					borderRadius: questionHeightUnselected / 2
 					width: questionWidthUnselected
 					height: questionHeightUnselected
+					x: 0
+					y: 0
 					shadowColor: "rgba(0,0,0,0)"
 				time: time
 		question.answerLayer.text = "" if not selected and not question.isAnswered
