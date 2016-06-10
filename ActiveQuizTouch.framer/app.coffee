@@ -1,7 +1,7 @@
 {TextLayer} = require 'TextLayer'
 
 # Set this to true to cause many questions to be spawned when the level starts.
-debugShouldSpawnManyQuestions = true
+debugShouldSpawnManyQuestions = false
 
 #==========================================
 # Initial state 
@@ -61,7 +61,7 @@ questionBorderWidthUnselected = 1
 questionBorderWidthSelected = 3 * 2
 
 questionPromptSize = 48
-questionNumberSpacing = 2
+questionNumberSpacing = 14*2
 
 #==========================================
 # Points
@@ -185,13 +185,14 @@ addQuestion = (newQuestion, animated) ->
 		newQuestion.markAsExitQuestion()
 		
 	questions.unshift(newQuestion)
+	newQuestion.x = Math.floor(Utils.randomNumber(56*2, 93*2))
 	updateQuestionLayout animated
 	
 updateQuestionLayout = (animated) ->
 	answeredQuestions = questions.filter (question) -> question.isAnswered
 	unansweredQuestions = questions.filter (question) -> not question.isAnswered
 	
-	y = 0
+	y = 66*2
 	delay = 0
 	for question in unansweredQuestions
 		question.animate
