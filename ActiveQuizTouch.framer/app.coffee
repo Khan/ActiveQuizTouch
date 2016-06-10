@@ -29,7 +29,7 @@ lightGray = "rgba(227,229,230,1)"
 darkGray = "rgba(98,101,105,1)"
 correctColor = "rgba(116,207,112,1)"
 incorrectColor = "rgba(255,132,130,1)"
-selectColor = "rgba(157,243,255,1)" # TODO(andy): unused after redesign?
+selectColor = "rgba(240, 241, 242, 0.8)"
 whiteColor = "white"
 yellowColor = "yellow"
 transparent = "rgba(0,0,0,0)"
@@ -605,9 +605,9 @@ for column in [0..3]
 				backgroundColor: selectColor
 			normal:
 				if column == 3
-					backgroundColor: lightGray
+					backgroundColor: "rgba(240, 241, 242, 0.4)"
 				else 
-					backgroundColor: medGray
+					backgroundColor: "rgba(240, 241, 242, 0.5)"
 		key.onTouchStart (event, layer) ->
 			layer.states.switch "highlight", time: 0.1, curve: "easeout"
 			
@@ -616,10 +616,10 @@ for column in [0..3]
 		key.states.switchInstant "normal"
 		
 		keyLabel = new TextLayer
-			color: darkGray
+			color: whiteColor
 			parent: key
 			autoSize: true
-			fontSize: 48
+			fontSize: 22*2
 			fontFamily: fontFamily
 		
 		if column < 3 && row < 3
@@ -630,7 +630,7 @@ for column in [0..3]
 					unhighlight event, layer
 		else if column == 3 && row == 0
 			# Backspace
-			keyLabel.text = "bspace"
+			keyLabel.text = "bsp"
 			key.height = keyHeight * 2 - keySpacing
 			key.onTouchEnd (event, layer) ->
 				updatePendingNumber (answerBuffer) ->
@@ -649,14 +649,14 @@ for column in [0..3]
 				unhighlight event, layer
 		else if column == 3 && row == 2
 			# Submit
-			keyLabel.text = "Submit"
+			keyLabel.text = "check"
 			key.height = keyHeight * 2 - keySpacing
 			key.onTouchEnd (event, layer) ->
 				selectedQuestion.submit()
 				unhighlight event, layer
 		else if column == 0 && row == 3
 			# Plus/minus
-			keyLabel.text = "+/–"
+			keyLabel.text = "– / +" # TODO(andy) needs an asset
 			key.onTouchEnd (event, layer) ->
 				updatePendingNumber (answerBuffer) ->
 					number: answerBuffer.number
