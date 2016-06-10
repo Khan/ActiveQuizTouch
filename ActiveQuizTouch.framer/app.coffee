@@ -29,6 +29,8 @@ lightGray = "rgba(227,229,230,1)"
 darkGray = "rgba(98,101,105,1)"
 correctColor = "rgba(116,207,112,1)"
 incorrectColor = "rgba(255,132,130,1)"
+pointColor = "rgba(255,190,38,0.8)"
+timeColor = "rgba(1,209,193,0.8)"
 selectColor = "rgba(240, 241, 242, 0.8)"
 whiteColor = "white"
 yellowColor = "yellow"
@@ -230,18 +232,7 @@ createQuestion = (difficulty, level) ->
 	
 	questionInterior = question.copy()
 	questionInterior.parent = question
-		
-	questionBorder = new Layer
-		parent: questionInterior
-		borderColor: questionBorderColorUnselected
-		borderRadius: questionHeightUnselected / 2
-		borderWidth: questionBorderWidthUnselected
-		shadowBlur: 22*2
-		shadowSpread: 4*2
-		width: question.width
-		height: question.height
-		backgroundColor: ""
-		
+				
 	question.setSelected = (selected, animated) ->
 		if selected
 			time = if animated then 0.15 else 0
@@ -251,7 +242,7 @@ createQuestion = (difficulty, level) ->
 				properties: {x: -(newQuestionWidth - questionWidthUnselected) / 2}
 				time: time
 				
-			questionBorder.animate
+			question.questionBorder.animate
 				properties:
 					borderWidth: questionBorderWidthSelected
 					borderColor: questionBorderColorSelected
@@ -274,7 +265,7 @@ createQuestion = (difficulty, level) ->
 			questionInterior.animate
 				properties: {x: 0}
 				time: time
-			questionBorder.animate
+			question.questionBorder.animate
 				properties:
 					borderWidth: questionBorderWidthUnselected
 					borderColor: questionBorderColorUnselected
@@ -355,10 +346,21 @@ createQuestion = (difficulty, level) ->
 			parent: questionInterior
 			width: size
 			height: size
-			borderWidth: size/2
+			borderRadius: size/2
+			backgroundColor: if question.problem.reward.type == "points" then pointColor else timeColor
 			x: rewardX
 		rewardLayer.midY = questionInterior.height / 2
 			
+	question.questionBorder = new Layer
+		parent: questionInterior
+		borderColor: questionBorderColorUnselected
+		borderRadius: questionHeightUnselected / 2
+		borderWidth: questionBorderWidthUnselected
+		shadowBlur: 22*2
+		shadowSpread: 4*2
+		width: question.width
+		height: question.height
+		backgroundColor: ""
 		
 	question.updatePendingNumber = (newAnswerBuffer) ->
 		question.answerBuffer = newAnswerBuffer
