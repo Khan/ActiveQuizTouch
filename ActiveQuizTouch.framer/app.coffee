@@ -53,7 +53,6 @@ background.sendToBack()
 # Sizes of things
 
 questionWidthUnselected = 195 * 2
-questionWidthSelected = 245 * 2
 questionHeightUnselected = 55 * 2
 questionHeightSelected = 61 * 2
 
@@ -246,9 +245,10 @@ createQuestion = (difficulty, level) ->
 	question.setSelected = (selected, animated) ->
 		if selected
 			time = if animated then 0.15 else 0
+			newQuestionWidth = Math.max(question.answerLayer.maxX + questionLeftPadding, questionWidthUnselected)
 			
 			questionInterior.animate
-				properties: {x: -(questionWidthSelected - questionWidthUnselected) / 2}
+				properties: {x: -(newQuestionWidth - questionWidthUnselected) / 2}
 				time: time
 				
 			questionBorder.animate
@@ -257,11 +257,11 @@ createQuestion = (difficulty, level) ->
 					borderColor: questionBorderColorSelected
 					borderRadius: questionHeightSelected / 2
 					y: -(questionHeightSelected - questionHeightUnselected) / 2
-					width: questionWidthSelected
+					width: newQuestionWidth
 					height: questionHeightSelected
 					shadowColor: whiteColor
 				time: time
-			newPromptLayerX = questionLeftPadding - (questionWidthSelected - questionWidthUnselected) / 2
+
 			question.equalsLabel.animate
 				properties: {opacity: 1}
 				time: time
@@ -334,7 +334,7 @@ createQuestion = (difficulty, level) ->
 	question.answerLayer.calcSize()
 	question.answerLayer.midY = question.height / 2
 	question.answerLayer.x = question.equalsLabel.maxX + questionPromptEqualsSignSpacing
-	question.answerLayer.width = 95*2
+	question.answerLayer.width = 40*2
 	question.answerLayer.text = " "
 	question.answerLayer.style["border-bottom"] = "6px solid white"
 	question.answerBuffer = {number: null, sign: 1}
@@ -752,7 +752,7 @@ noSelectionKeyboardOverlayLabel = new TextLayer
 	autoSize: true
 	color: whiteColor
 	fontFamily: fontFamily
-	fontSize: 64
+	fontSize: 48
 noSelectionKeyboardOverlayLabel.midX = keyboard.midX
 noSelectionKeyboardOverlayLabel.midY = keyboard.height / 2
 
