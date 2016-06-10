@@ -52,7 +52,9 @@ framer/mirror.css
 framer/preview.png
 framer/style.css
 framer/version
+images/Correct@2x.png
 images/ExitIndicator@2x.png
+images/Incorrect@2x.png
 index.html
 modules/myModule.coffee
 modules/TextLayer.coffee

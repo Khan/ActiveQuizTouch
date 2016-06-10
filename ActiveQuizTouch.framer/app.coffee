@@ -27,8 +27,6 @@ clip = (value, min, max) ->
 medGray = "rgba(216,216,216,1)"
 lightGray = "rgba(227,229,230,1)"
 darkGray = "rgba(98,101,105,1)"
-correctColor = "rgba(116,207,112,1)"
-incorrectColor = "rgba(255,132,130,1)"
 pointColor = "rgba(255,190,38,1)"
 timeColor = "rgba(1,209,193,1)"
 selectColor = "rgba(240, 241, 242, 0.8)"
@@ -424,21 +422,17 @@ createQuestion = (difficulty, level) ->
 		userAnswer = question.answerBuffer.number * question.answerBuffer.sign
 		isCorrect = userAnswer == question.problem.answer
 		if isCorrect
-			question.isAnswered = true
+# 			question.isAnswered = true
 			question.giveRewards()
 			setSelectedQuestion null, true
 			
 			correctHighlightLayer = new Layer
 				parent: questionInterior
-				backgroundColor: correctColor
-				width: question.width
-				height: 0
-				y: 0
+				image: "images/Correct@2x.png"
+				width: 34
+				height: 26
+				x: question.width - 30
 				borderRadius: question.borderRadius
-			correctHighlightLayer.animate
-				properties:
-					height: question.height
-				time: 0.2
 			
 			if question.isExit
 				setGameState "levelComplete"
