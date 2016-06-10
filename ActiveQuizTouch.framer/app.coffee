@@ -607,14 +607,15 @@ updatePendingNumber = (updateFunction) ->
 #==========================================
 # Keyboard
 
-keyboard = new Layer
+keyboardContainer = new Layer
 	parent: levelRootLayer
-	y: Screen.height - keyboardHeight
+	y: Screen.height - keyboardHeight - 1
 	width: Screen.width
-	height: keyboardHeight
+	height: keyboardHeight + 1
 	backgroundColor: ""
+	
 blurStyle = "blur(50px)"
-keyboard.style["-webkit-backdrop-filter"] = blurStyle
+keyboardContainer.style["-webkit-backdrop-filter"] = blurStyle
 if !CSS.supports("-webkit-backdrop-filter", blurStyle)
 	# Can't scroll under the keyboard if we don't have backdrops.
 	newInset = 110
@@ -624,9 +625,13 @@ if !CSS.supports("-webkit-backdrop-filter", blurStyle)
 		bottom: newInset
 	questionScrollComponent.updateContent()
 
+keyboard = keyboardContainer.copy()
+keyboard.parent = keyboardContainer
+keyboard.y = 1
+
 keyWidth = Screen.width / 4
 keyHeight = keyboardHeight / 4
-keySpacing = 2
+keySpacing = 1
 
 appendDigit = (digit) ->
 	updatePendingNumber (answerBuffer) ->
@@ -718,21 +723,23 @@ for column in [0..3]
 		keyLabel.center()
 
 noSelectionKeyboardOverlay = new Layer
-	parent: levelRootLayer
+	parent: keyboardContainer
 	width: keyboard.width
 	height: keyboard.height
 	x: keyboard.x
 	y: keyboard.y
-	backgroundColor: "rgba(216,216,216,1)"
+	backgroundColor: "rgba(240, 241, 242, 0.4)"
 noop = (event) -> return
 noSelectionKeyboardOverlay.setVisible = (isVisible) ->
 	if isVisible
 		noSelectionKeyboardOverlay.visible = true
 	
 	animationLengthInSeconds = 0.2
-	noSelectionKeyboardOverlay?.animate
-		properties:
-			opacity: if isVisible then 1 else 0
+	noSelectionKeyboardOverlay.animate
+		properties: {opacity: if isVisible then 1 else 0}
+		time: animationLengthInSeconds
+	keyboard.animate
+		properties: {opacity: if isVisible then 0 else 1}
 		time: animationLengthInSeconds
 	if not isVisible
 		setTimeout(->
@@ -743,9 +750,9 @@ noSelectionKeyboardOverlayLabel = new TextLayer
 	parent: noSelectionKeyboardOverlay
 	text: "Select a question"
 	autoSize: true
-	color: darkGray
+	color: whiteColor
 	fontFamily: fontFamily
-	fontSize: 48
+	fontSize: 64
 noSelectionKeyboardOverlayLabel.midX = keyboard.midX
 noSelectionKeyboardOverlayLabel.midY = keyboard.height / 2
 
