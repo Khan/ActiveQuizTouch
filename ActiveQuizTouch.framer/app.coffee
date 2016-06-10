@@ -330,13 +330,13 @@ createQuestion = (difficulty, level) ->
 	question.answerLayer.style["border-bottom"] = "6px solid white"
 	question.answerBuffer = {number: null, sign: 1}
 		
-	rewardDebugLayer = new TextLayer
-		parent: questionInterior
-		x: 30
-		y: 70
-		autoSize: true
-		color: "black"
-	rewardDebugLayer.text = "#{question.problem.reward.count} #{if question.problem.reward.type == "points" then "points" else "time units"}; #{question.problem.questionsRevealed} question revealed; difficulty = #{difficulty}"
+# 	rewardDebugLayer = new TextLayer
+# 		parent: questionInterior
+# 		x: 30
+# 		y: 70
+# 		autoSize: true
+# 		color: "black"
+# 	rewardDebugLayer.text = "#{question.problem.reward.count} #{if question.problem.reward.type == "points" then "points" else "time units"}; #{question.problem.questionsRevealed} question revealed; difficulty = #{difficulty}"
 	
 	# Make reward circles
 	rewardX = 0
