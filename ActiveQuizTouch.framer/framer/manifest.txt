@@ -49,6 +49,7 @@ framer/images/icon-share.png
 framer/images/icon-share@2x.png
 framer/manifest.txt
 framer/mirror.css
+framer/preview.png
 framer/style.css
 framer/version
 index.html

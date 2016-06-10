@@ -1,11 +1,12 @@
 {TextLayer} = require 'TextLayer'
 
+# Initial state 
+
 points = 0
 currentLevel = null # 1-indexed (for convenience, because it's shown to the user)
 exitQuestionIndex = null # Tracks which question index is going to be the exit question in this level--it may not have been added yet.
-startingClockTimeInSeconds = 60
-
 setGameState = null # Defined later; working around Framer definition ordering issues.
+
 levelRootLayer = new Layer
 	width: Screen.width
 	height: Screen.height
@@ -14,7 +15,6 @@ levelRootLayer = new Layer
 clip = (value, min, max) ->
 	Math.max(min, Math.min(max, value))
 
-#==========================================
 # Style Stuffz
 
 # Color Palette
@@ -44,11 +44,14 @@ background.sendToBack()
 
 # Sizes of things
 
+questionWidthUnselected = 195 * 2
+questionWidthSelected = 222 * 2
+questionHeightUnselected = 55 * 2
+questionHeightSelected = 61 * 2
+
 questionPromptSize = 48
-questionNumberHeight = 100
 questionNumberSpacing = 2
 
-#==========================================
 # Points
 
 pointsDisplay = new TextLayer
@@ -62,8 +65,9 @@ setPoints = (newPoints) ->
 	points = newPoints
 setPoints(0)
 
-#==========================================
 # Timer
+
+startingClockTimeInSeconds = 60
 
 endTime = Infinity
 pauseTime = null # When set, contains the remaining number of milliseconds before the game should end
@@ -104,7 +108,6 @@ requestAnimationFrame updateTimer
 addTime = (extraSeconds) ->
 	endTime += extraSeconds * 1000
 
-#==========================================
 # Problem Generation
 
 allOperators = [
@@ -134,7 +137,6 @@ generateProblem = (difficulty, level) ->
 		type: if Math.random(1) > 0.33 then "points" else "time"
 	questionsRevealed: Utils.randomChoice([0, 1, 1, 2, 2, 2, 3])
 
-#==========================================
 # Game "board"
 
 maximumNumberOfProblems = (levelNumber) ->
@@ -182,7 +184,7 @@ updateQuestionLayout = (animated) ->
 				y: y
 			time: if animated then 0.2 else 0
 			delay: delay
-		y += questionNumberHeight + questionNumberSpacing
+		y += questionHeightUnselected + questionNumberSpacing
 		delay += 0.02
 	for question in answeredQuestions
 		question.animate
@@ -190,40 +192,43 @@ updateQuestionLayout = (animated) ->
 				y: y
 			time: if animated then 0.2 else 0
 			delay: delay
-		y += questionNumberHeight + questionNumberSpacing
+		y += questionHeightUnselected + questionNumberSpacing
 		delay += 0.02
 			
 	setTimeout(->
 		questionScrollComponent.updateContent() # Resize the scrollable bounds of the question scroll component according to the new layout
 	, (delay + 0.2) * 1000)
 
-#==========================================
 # Question Cells
 
 createQuestion = (difficulty, level) ->
 	question = new Layer
 		parent: questionScrollComponent.content
-		backgroundColor: whiteColor
-		width: Screen.width
-		height: questionNumberHeight
+		backgroundColor: ""
+		width: questionWidthUnselected
+		height: questionHeightUnselected
+		borderColor: whiteColor
+		borderRadius: questionHeightUnselected / 2
+		borderWidth: 1
 	
 	selectionHighlightLayer = new Layer
 		parent: question
-		backgroundColor: selectColor
+		backgroundColor: selectedQuestion
 		width: 0
 		height: question.height
+		borderRadius: question.borderRadius
 		
 	question.setSelected = (selected, animated) ->
 		if selected
-			selectionHighlightLayer.height = questionNumberHeight
+			selectionHighlightLayer.height = questionHeightUnselected
 			selectionHighlightLayer.y = 0
 			selectionHighlightLayer.animate
 				properties:
-					width: Screen.width
+					width: question.width
 				curve: "ease-in-out"
 				time: if animated then 0.35 else 0
 		else
-			selectionHighlightLayer.height = questionNumberHeight
+			selectionHighlightLayer.height = questionHeightUnselected
 			selectionHighlightLayer.y = 0
 			selectionHighlightLayer.animate
 				properties:
@@ -245,8 +250,6 @@ createQuestion = (difficulty, level) ->
 	question.isAnswered = false
 	
 	question.markAsExitQuestion = ->
-		question.borderColor = "orange"
-		question.borderWidth = 4
 		question.isExit = true
 			
 	questionPrompt = new TextLayer
@@ -262,7 +265,7 @@ createQuestion = (difficulty, level) ->
 		x: 400
 		width: 304
 		autoSize: true
-		height: questionNumberHeight
+		height: questionHeightUnselected
 		fontSize: questionPromptSize
 		color: incorrectColor
 		backgroundColor: transparent
@@ -320,6 +323,7 @@ createQuestion = (difficulty, level) ->
 				width: question.width
 				height: 0
 				y: 0
+				borderRadius: question.borderRadius
 			correctHighlightLayer.placeBefore(selectionHighlightLayer)
 			correctHighlightLayer.animate
 				properties:
@@ -348,6 +352,7 @@ createQuestion = (difficulty, level) ->
 				width: question.width
 				height: 0
 				y: question.height
+				borderRadius: question.borderRadius
 			incorrectHighlightLayer.placeBefore(selectionHighlightLayer)
 				
 			incorrectHighlightLayerAnimation = new Animation
@@ -367,7 +372,6 @@ createQuestion = (difficulty, level) ->
 		
 	return question	
 
-#==========================================
 # UI button
 
 createButton = (text, action) ->
@@ -397,7 +401,6 @@ createButton = (text, action) ->
 	buttonLabel.midY = button.height / 2
 	return button
 
-#==========================================
 # Level complete UI
 
 levelCompleteLayer = new Layer
@@ -426,7 +429,6 @@ nextLevelButton = createButton "Next level", ->
 nextLevelButton.parent = levelCompleteLayer
 nextLevelButton.y = 700
 
-#==========================================
 # Game over UI
 
 gameOverLayer = new Layer
@@ -456,7 +458,6 @@ retryButton = createButton "Play again", ->
 retryButton.parent = gameOverLayer
 retryButton.y = 700
 
-#==========================================
 # Game state
 
 setGameState = (newGameState) ->
@@ -516,13 +517,11 @@ setGameState = (newGameState) ->
 			gameOverScoreLabel.midX = gameOverLayer.midX
 	gameState = newGameState
 
-#==========================================
 # Answer Input
 
 updatePendingNumber = (updateFunction) ->
 	selectedQuestion.updatePendingNumber updateFunction(selectedQuestion.answerBuffer)
 
-#==========================================
 # Keyboard
 
 keyboardHeight = 432
@@ -659,8 +658,5 @@ noSelectionKeyboardOverlayLabel = new TextLayer
 	fontSize: 48
 noSelectionKeyboardOverlayLabel.midX = keyboard.midX
 noSelectionKeyboardOverlayLabel.midY = keyboard.height / 2
-
-#==========================================
-# Start!!
 
 setGameState "newGame"
