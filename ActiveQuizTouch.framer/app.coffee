@@ -29,8 +29,8 @@ lightGray = "rgba(227,229,230,1)"
 darkGray = "rgba(98,101,105,1)"
 correctColor = "rgba(116,207,112,1)"
 incorrectColor = "rgba(255,132,130,1)"
-pointColor = "rgba(255,190,38,0.8)"
-timeColor = "rgba(1,209,193,0.8)"
+pointColor = "rgba(255,190,38,1)"
+timeColor = "rgba(1,209,193,1)"
 selectColor = "rgba(240, 241, 242, 0.8)"
 whiteColor = "white"
 yellowColor = "yellow"
@@ -273,7 +273,7 @@ createQuestion = (difficulty, level) ->
 					width: questionWidthUnselected
 					height: questionHeightUnselected
 					y: 0
-					shadowColor: transparent
+					shadowColor: "rgba(255,255,255,0)"
 				time: time
 			question.equalsLabel.animate
 				properties: {opacity: 0}
@@ -338,6 +338,7 @@ createQuestion = (difficulty, level) ->
 		color: "black"
 	rewardDebugLayer.text = "#{question.problem.reward.count} #{if question.problem.reward.type == "points" then "points" else "time units"}; #{question.problem.questionsRevealed} question revealed; difficulty = #{difficulty}"
 	
+	# Make reward circles
 	rewardX = 0
 	for rewardIndex in [0...question.problem.reward.count]
 		size = 45*2 - rewardIndex*10*2
@@ -347,9 +348,25 @@ createQuestion = (difficulty, level) ->
 			width: size
 			height: size
 			borderRadius: size/2
+			opacity: 0.8 - 0.2*rewardIndex
 			backgroundColor: if question.problem.reward.type == "points" then pointColor else timeColor
 			x: rewardX
 		rewardLayer.midY = questionInterior.height / 2
+		
+	# Make revealed question circles
+	revealedQuestionX = questionInterior.width - 11*2
+	for questionIndex in [0...question.problem.questionsRevealed]
+		size = 45*2 - questionIndex*10*2
+		revealedQuestionLayer = new Layer
+			parent: questionInterior
+			width: size
+			height: size
+			borderRadius: size/2
+			opacity: 0.6 - 0.2*questionIndex
+			backgroundColor: whiteColor
+			x: revealedQuestionX
+		revealedQuestionLayer.midY = questionInterior.height / 2
+		revealedQuestionX += size - 11*2
 			
 	question.questionBorder = new Layer
 		parent: questionInterior
@@ -361,6 +378,7 @@ createQuestion = (difficulty, level) ->
 		width: question.width
 		height: question.height
 		backgroundColor: ""
+		shadowColor: transparent
 		
 	question.updatePendingNumber = (newAnswerBuffer) ->
 		question.answerBuffer = newAnswerBuffer
