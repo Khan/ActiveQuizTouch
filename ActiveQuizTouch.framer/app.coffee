@@ -272,13 +272,14 @@ createQuestion = (difficulty, level) ->
 				time: time
 			question.questionBorder.animate
 				properties:
-					borderWidth: questionBorderWidthUnselected
+					borderWidth: if question.isAnswered then 0 else questionBorderWidthUnselected
 					borderColor: questionBorderColorUnselected
 					borderRadius: questionHeightUnselected / 2
 					width: newQuestionWidth
 					height: questionHeightUnselected
 					y: 0
 					shadowColor: "rgba(255,255,255,0)"
+					backgroundColor: if question.isAnswered then "rgba(255, 255, 255, 0.3)" else ""
 				time: time
 			question.equalsLabel.animate
 				properties: {opacity: 0}
@@ -422,18 +423,27 @@ createQuestion = (difficulty, level) ->
 		userAnswer = question.answerBuffer.number * question.answerBuffer.sign
 		isCorrect = userAnswer == question.problem.answer
 		if isCorrect
-# 			question.isAnswered = true
+			question.isAnswered = true
 			question.giveRewards()
 			setSelectedQuestion null, true
 			
-			correctHighlightLayer = new Layer
-				parent: questionInterior
+			correctIconLayer = new Layer
+				parent: question.revealedQuestionContainer
 				image: "images/Correct@2x.png"
-				width: 34
-				height: 26
-				x: question.width - 30
+				width: 68
+				height: 52
+				x: -50
 				borderRadius: question.borderRadius
+				opacity: 0
+				scale: 0.5
+			correctIconLayer.midY = questionInterior.height / 2
 			
+			correctIconLayer.animate
+				properties:
+					opacity: 1
+					scale: 1
+				curve: "spring(400, 50, 100)"
+							
 			if question.isExit
 				setGameState "levelComplete"
 			else
