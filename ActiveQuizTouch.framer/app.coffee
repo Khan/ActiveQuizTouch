@@ -73,11 +73,22 @@ keyboardHeight = 432
 pointsDisplay = new TextLayer
 	parent: levelRootLayer
 	color: whiteColor
-	fontSize: 40
-	x: 30
-	y: 30
+	fontSize: 13*2
+	fontFamily: fontFamily
+	x: 180
+	y: 18
+	
+pointsIcon = new Layer
+	parent: levelRootLayer
+	backgroundColor: pointColor
+	x: 140
+	y: 18
+	width: 15*2
+	height: 15*2
+	borderRadius: 15
+	
 setPoints = (newPoints) ->
-	pointsDisplay.text = "Points: " + newPoints
+	pointsDisplay.text = newPoints
 	points = newPoints
 setPoints(0)
 
@@ -90,15 +101,30 @@ endTime = Infinity
 pauseTime = null # When set, contains the remaining number of milliseconds before the game should end
 lastTimeUpdate = 0
 
+headerHairline = new Layer
+	parent: levelRootLayer
+	y: 32*2
+	backgroundColor: "rgba(255, 255, 255, 0.5)"
+	width: Screen.width
+	height: 1
+
 timeDisplay = new TextLayer
 	parent: levelRootLayer
 	color: whiteColor
-	fontSize: 40
+	fontFamily: fontFamily
+	fontSize: 13*2
 	width: 300
-	x: Screen.width - 330
-	y: 30
-	textAlign: "right"
-	text: "Remaining: 3s"
+	y: pointsDisplay.y
+	text: ""
+	
+levelDisplay = new TextLayer
+	parent: levelRootLayer
+	color: whiteColor
+	fontFamily: fontFamily
+	fontSize: 13*2
+	x: 16
+	y: pointsDisplay.y
+	text: "Level "
 
 pause = -> pauseTime = endTime - performance.now()
 unpause = ->
@@ -117,7 +143,9 @@ updateTimer = (timestamp) ->
 		
 	if newTime != lastTimeUpdate
 		lastTimeUpdate = newTime
-		timeDisplay.text = "Remaining: " + newTime + "s"
+		timeDisplay.text = newTime
+		timeDisplay.calcSize()
+		timeDisplay.maxX = Screen.width - levelDisplay.x
 
 requestAnimationFrame updateTimer
 
@@ -583,7 +611,7 @@ setGameState = (newGameState) ->
 			
 		when "level"
 			setSelectedQuestion null, false
-		
+			
 			for question in questions
 				question.destroy()
 			questions = []
@@ -591,6 +619,8 @@ setGameState = (newGameState) ->
 			levelRootLayer.visible = true
 			levelCompleteLayer.visible = false
 			gameOverLayer.visible = false
+			
+			levelDisplay.text = "Level #{currentLevel}"
 			
 			exitQuestionIndex = Math.round(Utils.randomNumber(Math.floor(maximumNumberOfProblems(currentLevel) / 2), maximumNumberOfProblems(currentLevel) - 1))
 
