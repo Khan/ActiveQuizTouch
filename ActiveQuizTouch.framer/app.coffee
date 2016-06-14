@@ -416,6 +416,25 @@ createQuestion = (difficulty, level) ->
 				# Give 3 seconds per "time unit".
 				addTime question.problem.reward.count * 3
 
+	# For correct / incorrect
+	addEphemeralIcon = (iconName, width, height, rightMargin) ->
+		iconLayer = new Layer
+			parent: question.revealedQuestionContainer
+			image: iconName
+			width: width
+			height: height
+			x: rightMargin
+			opacity: 0
+			scale: 0.5
+		iconLayer.midY = questionInterior.height / 2
+		
+		iconLayer.animate
+			properties:
+				opacity: 1
+				scale: 1
+			curve: "spring(400, 50, 100)"
+		
+		return iconLayer
 
 	question.submit = ->
 		return if question.isAnswered
@@ -426,24 +445,9 @@ createQuestion = (difficulty, level) ->
 			question.isAnswered = true
 			question.giveRewards()
 			setSelectedQuestion null, true
+
+			addEphemeralIcon "images/Correct@2x.png", 68, 52, -50
 			
-			correctIconLayer = new Layer
-				parent: question.revealedQuestionContainer
-				image: "images/Correct@2x.png"
-				width: 68
-				height: 52
-				x: -50
-				borderRadius: question.borderRadius
-				opacity: 0
-				scale: 0.5
-			correctIconLayer.midY = questionInterior.height / 2
-			
-			correctIconLayer.animate
-				properties:
-					opacity: 1
-					scale: 1
-				curve: "spring(400, 50, 100)"
-							
 			if question.isExit
 				setGameState "levelComplete"
 			else
@@ -460,26 +464,16 @@ createQuestion = (difficulty, level) ->
 					addQuestion createQuestion(newDifficulty, level), true
 				updateQuestionLayout true
 		else
-			incorrectHighlightLayer = new Layer
-				parent: questionInterior
-				backgroundColor: incorrectColor
-				width: question.width
-				height: 0
-				y: question.height
-				borderRadius: question.borderRadius
-				
-			incorrectHighlightLayerAnimation = new Animation
-				layer: incorrectHighlightLayer
-				time: 0.2
-				properties:
-					height: question.height
-					y: 0
+			incorrectIcon = addEphemeralIcon "images/Incorrect@2x.png", 44, 44, -36
 			 
 			# After a little bit, reverse the animation.
 			setTimeout(->
-				incorrectHighlightLayerAnimation.reverse().start() 
-			, 700) # in milliseconds
-			incorrectHighlightLayerAnimation.start()
+				disappearAnimation = incorrectIcon.animate
+					properties:
+						scale: 0
+					time: 0.2
+				disappearAnimation.on(Events.AnimationEnd, -> incorrectIcon.destroy())
+			, 600) # in milliseconds
 			
 			question.ghostifyAnswer()
 		
