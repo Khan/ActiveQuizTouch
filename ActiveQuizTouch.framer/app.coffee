@@ -75,14 +75,14 @@ pointsDisplay = new TextLayer
 	color: whiteColor
 	fontSize: 13*2
 	fontFamily: fontFamily
-	x: 180
-	y: 18
+	x: 185
+	y: 15
 	
 pointsIcon = new Layer
 	parent: levelRootLayer
 	backgroundColor: pointColor
-	x: 140
-	y: 18
+	x: 145
+	y: 17
 	width: 15*2
 	height: 15*2
 	borderRadius: 15
@@ -113,9 +113,25 @@ timeDisplay = new TextLayer
 	color: whiteColor
 	fontFamily: fontFamily
 	fontSize: 13*2
-	width: 300
 	y: pointsDisplay.y
 	text: ""
+	
+timeScaleBackground = new Layer
+	parent: levelRootLayer
+	backgroundColor: "rgba(49, 68, 83, 0.2)"
+	x: 122*2
+	y: 8*2
+	width: 220*2
+	height: 15*2
+	borderRadius: 15
+	clip: true
+timeScaleForeground = timeScaleBackground.copy()
+timeScaleForeground.props =
+	parent: timeScaleBackground
+	backgroundColor: timeColor
+	x: 0
+	y: 0
+	clip: false
 	
 levelDisplay = new TextLayer
 	parent: levelRootLayer
@@ -137,13 +153,16 @@ updateTimer = (timestamp) ->
 
 	return if pauseTime != null
 	
-	newTime = Math.ceil((endTime - timestamp) / 1000)
-	if newTime <= 0
+	remainingSeconds = clip((endTime - timestamp) / 1000, 0, 60)
+	if remainingSeconds <= 0
 		setGameState "gameOver"
+	
+	timeScaleForeground.x = -timeScaleBackground.width * (60 - remainingSeconds) / 60
 		
-	if newTime != lastTimeUpdate
-		lastTimeUpdate = newTime
-		timeDisplay.text = newTime
+	newTextualDisplayTime = Math.ceil(remainingSeconds)
+	if newTextualDisplayTime != lastTimeUpdate
+		lastTimeUpdate = newTextualDisplayTime
+		timeDisplay.text = newTextualDisplayTime
 		timeDisplay.calcSize()
 		timeDisplay.maxX = Screen.width - levelDisplay.x
 
