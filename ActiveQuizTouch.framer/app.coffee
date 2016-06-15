@@ -590,6 +590,7 @@ levelCompleteLayer = new Layer
 	width: Screen.width
 	height: Screen.height
 	visible: false
+	backgroundColor: ""
 levelCompleteLabel = new TextLayer
 	parent: levelCompleteLayer
 	color: "white"
@@ -619,6 +620,7 @@ gameOverLayer = new Layer
 	width: Screen.width
 	height: Screen.height
 	visible: false
+	backgroundColor: ""
 gameOverLabel = new TextLayer
 	parent: gameOverLayer
 	color: "white"
