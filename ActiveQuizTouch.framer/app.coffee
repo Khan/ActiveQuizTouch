@@ -613,9 +613,9 @@ createButton = (text, action) ->
 		height: 100
 	button.states.add
 		normal:
-			backgroundColor: medGray
+			backgroundColor: "rgba(240, 241, 242, 0.5)"
 		highlight:
-			backgroundColor: selectColor
+			backgroundColor: "rgba(240, 241, 242, 0.6)"
 	button.states.switchInstant "normal"
 	button.onTouchStart ->
 		button.states.switch "highlight", time: 0.1, curve: "easeout"
@@ -627,7 +627,7 @@ createButton = (text, action) ->
 		parent: button
 		fontSize: 48
 		fontFamily: fontFamily
-		color: "black"
+		color: whiteColor
 		autoSize: true
 		text: text
 	buttonLabel.midX = button.width / 2
@@ -817,7 +817,7 @@ for column in [0..3]
 			parent: keyboard
 		key.states.add
 			highlight:
-				backgroundColor: selectColor
+				backgroundColor: "rgba(240, 241, 242, 0.6)"
 			normal:
 				if column == 3
 					backgroundColor: "rgba(240, 241, 242, 0.4)"
