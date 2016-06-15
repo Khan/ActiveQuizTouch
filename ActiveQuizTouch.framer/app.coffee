@@ -157,7 +157,10 @@ updateTimer = (timestamp) ->
 	if remainingSeconds <= 0
 		setGameState "gameOver"
 	
-	timeScaleForeground.x = -timeScaleBackground.width * (60 - remainingSeconds) / 60
+	timeScaleForeground.animate
+		properties:
+			x: -timeScaleBackground.width * (60 - remainingSeconds) / 60
+		time: 0.05
 		
 	newTextualDisplayTime = Math.ceil(remainingSeconds)
 	if newTextualDisplayTime != lastTimeUpdate
@@ -211,9 +214,9 @@ maximumNumberOfProblems = (levelNumber) ->
 
 questionScrollComponent = new ScrollComponent
 	parent: levelRootLayer
-	y: 110
+	y: headerHairline.maxY
 	width: Screen.width
-	height: Screen.height - 110
+	height: Screen.height - headerHairline.maxY
 	scrollHorizontal: false
 	contentInset:
 		top: 0
@@ -395,6 +398,7 @@ createQuestion = (difficulty, level) ->
 	
 	# Make reward circles
 	rewardX = 0
+	question.rewardLayers = []
 	for rewardIndex in [0...question.problem.reward.count]
 		size = 45*2 - rewardIndex*10*2
 		rewardX -= (size - 11*2)
@@ -407,6 +411,33 @@ createQuestion = (difficulty, level) ->
 			backgroundColor: if question.problem.reward.type == "points" then pointColor else timeColor
 			x: rewardX
 		rewardLayer.midY = questionInterior.height / 2
+		
+		# CoffeeScript's scope binding semantics are ridiculous; rewardLayer and rewardIndex are reassigned on every loop iteration and captured by-reference. This do() syntax avoids that. Feh!
+		do (rewardIndex, rewardLayer) ->
+			rewardLayer.giveReward = ->
+				targetLayer = if question.problem.reward.type == "points" then pointsIcon else timeScaleBackground
+				rewardLayerScreenFrame = rewardLayer.screenFrame
+				targetLayerScreenFrame = targetLayer.screenFrame
+				rewardLayer.parent = levelRootLayer
+				rewardLayer.screenFrame = rewardLayerScreenFrame
+				scale = targetLayer.height / rewardLayer.height
+				animation = rewardLayer.animate
+					properties:
+						midX: targetLayerScreenFrame.x + rewardLayer.width * scale / 2
+						midY: targetLayerScreenFrame.y + targetLayerScreenFrame.height / 2
+						scale: scale
+					time: 0.5
+					delay: 0.1 * rewardIndex
+				animation.on(Events.AnimationEnd, (animation) ->
+					rewardLayer.destroy()
+					switch question.problem.reward.type
+						when "points"
+							setPoints points + 1
+						when "time"
+							# Give 3 seconds per "time unit".
+							addTime 3
+				)
+		question.rewardLayers.push rewardLayer
 		
 	# Make revealed question circles
 	question.revealedQuestionContainer = new Layer
@@ -456,12 +487,8 @@ createQuestion = (difficulty, level) ->
 		question.answerBuffer = {number: null, sign: 1}
 		
 	question.giveRewards = ->
-		switch question.problem.reward.type
-			when "points"
-				setPoints points + question.problem.reward.count
-			when "time"
-				# Give 3 seconds per "time unit".
-				addTime question.problem.reward.count * 3
+		for rewardLayer in question.rewardLayers
+			rewardLayer.giveReward()
 
 	# For correct / incorrect
 	addEphemeralIcon = (iconName, width, height, rightMargin) ->
