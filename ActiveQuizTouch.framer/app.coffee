@@ -157,17 +157,17 @@ updateTimer = (timestamp) ->
 	if remainingSeconds <= 0
 		setGameState "gameOver"
 	
-	timeScaleForeground.animate
-		properties:
-			x: -timeScaleBackground.width * (60 - remainingSeconds) / 60
-		time: 0.05
-		
 	newTextualDisplayTime = Math.ceil(remainingSeconds)
 	if newTextualDisplayTime != lastTimeUpdate
 		lastTimeUpdate = newTextualDisplayTime
 		timeDisplay.text = newTextualDisplayTime
 		timeDisplay.calcSize()
 		timeDisplay.maxX = Screen.width - levelDisplay.x
+		
+		timeScaleForeground.animate
+			properties:
+				x: -timeScaleBackground.width * (60 - remainingSeconds) / 60
+			time: 0.05
 
 requestAnimationFrame updateTimer
 
