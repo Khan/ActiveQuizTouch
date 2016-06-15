@@ -2,6 +2,7 @@
 
 # Set this to true to cause many questions to be spawned when the level starts.
 debugShouldSpawnManyQuestions = false
+debugStartingLevel = 1
 
 #==========================================
 # Initial state 
@@ -232,9 +233,10 @@ setSelectedQuestion = (newSelectedQuestion, animated) ->
 	noSelectionKeyboardOverlay?.setVisible (if newSelectedQuestion then false else true)
 	
 questions = []
+completedQuestions = []
 
 addQuestion = (newQuestion, animated) ->
-	if questions.length == exitQuestionIndex
+	if questions.length + completedQuestions.length == exitQuestionIndex
 		# That means we're about to add the end question! Neat!
 		newQuestion.markAsExitQuestion()
 		
@@ -242,26 +244,25 @@ addQuestion = (newQuestion, animated) ->
 	newQuestion.x = Math.floor(Utils.randomNumber(56*2, 93*2))
 	updateQuestionLayout animated
 	
-updateQuestionLayout = (animated) ->
-	answeredQuestions = questions.filter (question) -> question.isAnswered
-	unansweredQuestions = questions.filter (question) -> not question.isAnswered
-	
+updateQuestionLayout = (animated) ->	
 	y = 66*2
 	delay = 0
-	for question in unansweredQuestions
+	for question in questions
 		question.animate
 			properties:
 				y: y
 			time: if animated then 0.2 else 0
 			delay: delay
+		question.targetY = y
 		y += questionHeightUnselected + questionNumberSpacing
 		delay += 0.02
-	for question in answeredQuestions
+	for question in completedQuestions
 		question.animate
 			properties:
 				y: y
 			time: if animated then 0.2 else 0
 			delay: delay
+		question.targetY = y
 		y += questionHeightUnselected + questionNumberSpacing
 		delay += 0.02
 			
@@ -453,8 +454,10 @@ createQuestion = (difficulty, level) ->
 			width: size
 			height: size
 			borderRadius: size/2
-			opacity: 0.6 - 0.2*questionIndex
-			backgroundColor: whiteColor
+			opacity: 0.6 - 0.1*questionIndex
+			borderColor: whiteColor
+			borderWidth: 1
+			backgroundColor: ""
 			x: revealedQuestionDotX
 		revealedQuestionLayer.midY = questionInterior.height / 2
 		revealedQuestionDotX += size - 11*2
@@ -516,27 +519,79 @@ createQuestion = (difficulty, level) ->
 		userAnswer = question.answerBuffer.number * question.answerBuffer.sign
 		isCorrect = userAnswer == question.problem.answer
 		if isCorrect
-			question.isAnswered = true
-			question.giveRewards()
-			setSelectedQuestion null, true
-
 			addEphemeralIcon "images/Correct@2x.png", 68, 52, -50
 			
-			if question.isExit
-				setGameState "levelComplete"
-			else
-				# Reveal new questions:
-				isLastAvailableQuestion = questions.filter((question) -> not question.isAnswered).length == 0
-				effectiveNumberOfQuestionsRevealed = clip(
-					question.problem.questionsRevealed,
-					if isLastAvailableQuestion then 1 else 0, 
-					maximumNumberOfProblems(level) - questions.length
-				)
-				for questionNumber in [0...effectiveNumberOfQuestionsRevealed]
-					# New question difficulty is based on previous question difficulty, but the difficulty level can only shift by 1 (either direction) each time, and it can never be more than 2 levels of difficult beyond the base level number.
-					newDifficulty = clip(difficulty + Utils.randomChoice([-1, 0, 1]), level, level + 2)
-					addQuestion createQuestion(newDifficulty, level), true
-				updateQuestionLayout true
+			# Let the icon come in for a moment.
+			setTimeout(->
+				question.giveRewards()
+				setSelectedQuestion null, true
+				
+				if question.isExit
+					setGameState "levelComplete"
+				else
+					# Reveal new questions:
+					isLastAvailableQuestion = questions.length == 1
+					effectiveNumberOfQuestionsRevealed = clip(
+						question.problem.questionsRevealed,
+						if isLastAvailableQuestion then 1 else 0, 
+						Infinity
+# 						maximumNumberOfProblems(level) - questions.length
+					)
+					
+					print questions.indexOf(question)
+					print questions
+					questions.splice(questions.indexOf(question), 1)
+					print questions
+					completedQuestions.unshift(question)
+					question.isAnswered = true
+					
+					newQuestions = []
+					for questionNumber in [0...effectiveNumberOfQuestionsRevealed]
+						# New question difficulty is based on previous question difficulty, but the difficulty level can only shift by 1 (either direction) each time, and it can never be more than 2 levels of difficult beyond the base level number.
+						newDifficulty = clip(difficulty + Utils.randomChoice([-1, 0, 1]), level, level + 2)
+						
+						newQuestion = createQuestion(newDifficulty, level)
+						newQuestion.opacity = 0
+						addQuestion newQuestion, true
+						newQuestions.push(newQuestion)
+						
+					updateQuestionLayout true
+						
+					delay = 0
+					for questionNumber in [0...effectiveNumberOfQuestionsRevealed]
+						dot = question.revealedQuestionDots[questionNumber]
+						newQuestion = newQuestions[questionNumber]
+						delay = 0.1 * (effectiveNumberOfQuestionsRevealed - 1 - questionNumber)
+						newQuestionFadeAnimation = newQuestion.animate
+							properties: {opacity: 1}
+							delay: 0.4 + delay
+							time: 0.2
+							
+						dot.parent = newQuestion.parent
+						dot.x += question.x + questionInterior.x + question.revealedQuestionContainer.x
+						dot.y += question.y
+						dot.animate
+							properties: {y: newQuestion.targetY}
+							time: 0.4
+						dot.animate
+							properties: {x: newQuestion.x}
+							time: 0.3
+							delay: 0.1 + delay
+						dot.animate
+							properties:
+								width: newQuestion.width
+								height: newQuestion.height
+								borderRadius: newQuestion.height / 2
+							time: 0.3
+							delay: 0.1 + delay
+						
+						do (dot) ->
+							newQuestionFadeAnimation.on(Events.AnimationEnd, ->
+								dot.destroy()
+							)
+# 					setTimeout(->
+# 					, delay * 1000 + 300)
+			, 300) # in milliseconds
 		else
 			incorrectIcon = addEphemeralIcon "images/Incorrect@2x.png", 44, 44, -36
 			 
@@ -652,7 +707,7 @@ setGameState = (newGameState) ->
 	
 	switch newGameState
 		when "newGame"
-			currentLevel = 1
+			currentLevel = debugStartingLevel
 			endTime = performance.now() + startingClockTimeInSeconds * 1000
 			setPoints 0
 			setGameState "level"
@@ -662,7 +717,10 @@ setGameState = (newGameState) ->
 			
 			for question in questions
 				question.destroy()
+			for question in completedQuestions
+				question.destroy()
 			questions = []
+			completedQuestions = []
 			
 			levelRootLayer.visible = true
 			levelCompleteLayer.visible = false
