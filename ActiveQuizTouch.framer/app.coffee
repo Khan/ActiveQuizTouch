@@ -73,7 +73,6 @@ keyboardHeight = 432
 # Points
 
 pointsDisplay = new TextLayer
-	parent: levelRootLayer
 	color: whiteColor
 	fontSize: 13*2
 	fontFamily: fontFamily
@@ -81,7 +80,6 @@ pointsDisplay = new TextLayer
 	y: 15
 	
 pointsIcon = new Layer
-	parent: levelRootLayer
 	backgroundColor: pointColor
 	x: 145
 	y: 17
@@ -104,14 +102,12 @@ pauseTime = null # When set, contains the remaining number of milliseconds befor
 lastTimeUpdate = 0
 
 headerHairline = new Layer
-	parent: levelRootLayer
 	y: 32*2
 	backgroundColor: "rgba(255, 255, 255, 0.5)"
 	width: Screen.width
 	height: 1
 
 timeDisplay = new TextLayer
-	parent: levelRootLayer
 	color: whiteColor
 	fontFamily: fontFamily
 	fontSize: 13*2
@@ -119,7 +115,6 @@ timeDisplay = new TextLayer
 	text: ""
 	
 timeScaleBackground = new Layer
-	parent: levelRootLayer
 	backgroundColor: "rgba(49, 68, 83, 0.2)"
 	x: 122*2
 	y: 8*2
@@ -136,7 +131,6 @@ timeScaleForeground.props =
 	clip: false
 	
 levelDisplay = new TextLayer
-	parent: levelRootLayer
 	color: whiteColor
 	fontFamily: fontFamily
 	fontSize: 13*2
@@ -698,6 +692,21 @@ interstitialScoreLabel = new TextLayer
 nextLevelButton = createButton "Next level", ->
 	currentLevel += 1
 	setGameState "level"
+	
+	levelRootLayer.x = Screen.width
+	levelRootLayer.animate
+		properties: {x: 0}
+		delay: 0.15
+		time: 0.3
+	
+	interstitialLayer.animate
+		properties: {x: -Screen.width}
+		time: 0.3
+		
+	interstitialBackground.animate
+		properties: {opacity: 0}
+		time: 0.2
+	
 nextLevelButton.props =
 	parent: interstitialBoxLayer
 	width: interstitialBoxLayer.width
@@ -783,6 +792,7 @@ setGameState = (newGameState) ->
 
 			interstitialBackground.bringToFront()
 			interstitialLayer.bringToFront()
+			interstitialLayer.x = Screen.width
 			interstitialLayer.animate
 				properties: {x: 0}
 				delay: 0.15
