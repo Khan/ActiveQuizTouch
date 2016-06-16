@@ -687,8 +687,9 @@ interstitialHeaderLabel = new TextLayer
 interstitialScoreLabel = new TextLayer
 	parent: interstitialBoxLayer
 	color: darkTextColor
+	width: interstitialBoxLayer.width
 	y: 137*2
-	autoSize: true
+	textAlign: "center"
 	fontFamily: fontFamily
 	fontSize: 18*2
 	
@@ -707,6 +708,12 @@ interstitialTimeIcon.props =
 	parent: interstitialBoxLayer
 	backgroundColor: timeColor
 	y: 181*2
+	
+interstitialTimeLabel = interstitialScoreLabel.copy()
+interstitialTimeLabel.props =
+	parent: interstitialBoxLayer
+	textAlign: "center"
+	y: 233*2
 	
 nextLevelButton = createButton "Next level", ->
 	currentLevel += 1
@@ -765,6 +772,8 @@ retryButton.y = 700
 #==========================================
 # Game state
 
+levelStartingEndTime = null
+
 setGameState = (newGameState) ->
 	return if newGameState == gameState
 	
@@ -801,6 +810,7 @@ setGameState = (newGameState) ->
 				addQuestion createQuestion(currentLevel + Utils.randomChoice([0, 1, 2]), currentLevel) for _ in [0..5]
 			
 			unpause()
+			levelStartingEndTime = endTime
 
 		when "levelComplete"
 			pause()
@@ -829,6 +839,10 @@ setGameState = (newGameState) ->
 
 			interstitialScoreLabel.text = "#{points} points earned!"
 			interstitialScoreLabel.midX = interstitialBoxLayer.width / 2
+			
+			secondsEarned = Math.floor(Math.max(0, endTime - levelStartingEndTime) / 1000)
+			interstitialTimeLabel.text = "#{secondsEarned} seconds earned\n#{timeDisplay.text} seconds left!"
+			interstitialTimeLabel.midX = interstitialBoxLayer.width / 2
 			
 			nextLevelButton.buttonLabel.text = "Onward to Level #{currentLevel + 1}!"
 			nextLevelButton.buttonLabel.midX = nextLevelButton.width / 2
