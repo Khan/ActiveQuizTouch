@@ -526,7 +526,6 @@ createQuestion = (difficulty, level) ->
 			updateQuestionBackgroundColor true
 			
 			# Let the icon come in for a moment.
-<<<<<<< HEAD
 			setTimeout(->				
 				if question.isExit
 					# Give rewards for all remaining unanswered questions.
@@ -539,22 +538,12 @@ createQuestion = (difficulty, level) ->
 				else
 					question.giveRewards()
 
-=======
-			setTimeout(->
-				question.giveRewards()
-				setSelectedQuestion null, true
-				
-				if question.isExit
-					setGameState "levelComplete"
-				else
->>>>>>> ec8dd815d2d63f926666369e5549b475a66bdaa5
 					# Reveal new questions:
 					isLastAvailableQuestion = questions.length == 1
 					effectiveNumberOfQuestionsRevealed = clip(
 						question.problem.questionsRevealed,
 						if isLastAvailableQuestion then 1 else 0, 
 						Infinity
-<<<<<<< HEAD
 						# Eh, maybe let's not limit it for now...?
  						# maximumNumberOfProblems(level) - questions.length
 					)
@@ -565,18 +554,6 @@ createQuestion = (difficulty, level) ->
 					
 					setSelectedQuestion null, true
 					
-=======
-# 						maximumNumberOfProblems(level) - questions.length
-					)
-					
-					print questions.indexOf(question)
-					print questions
-					questions.splice(questions.indexOf(question), 1)
-					print questions
-					completedQuestions.unshift(question)
-					question.isAnswered = true
-					
->>>>>>> ec8dd815d2d63f926666369e5549b475a66bdaa5
 					newQuestions = []
 					for questionNumber in [0...effectiveNumberOfQuestionsRevealed]
 						# New question difficulty is based on previous question difficulty, but the difficulty level can only shift by 1 (either direction) each time, and it can never be more than 2 levels of difficult beyond the base level number.
