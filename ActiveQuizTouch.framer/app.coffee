@@ -712,7 +712,7 @@ nextLevelButton = createButton "Next level", ->
 	
 nextLevelButton.props =
 	parent: interstitialBoxLayer
-	midX: interstitialBoxLayer
+	midX: interstitialBoxLayer.width / 2
 	y: Align.bottom(-32*2)
 
 #==========================================
