@@ -283,7 +283,13 @@ createQuestion = (difficulty, level) ->
 	
 	questionInterior = question.copy()
 	questionInterior.parent = question
-				
+	
+	updateQuestionBackgroundColor = (animated) ->
+		question.questionBorder.animate
+			properties:
+				backgroundColor: if question.isAnswered then "rgba(255, 255, 255, 0.3)" else ""
+			time: if animated then 0.15 else 0
+		
 	question.setSelected = (selected, animated) ->
 		if selected
 			time = if animated then 0.15 else 0
@@ -331,7 +337,6 @@ createQuestion = (difficulty, level) ->
 					height: questionHeightUnselected
 					y: 0
 					shadowColor: "rgba(255,255,255,0)"
-					backgroundColor: if question.isAnswered then "rgba(255, 255, 255, 0.3)" else ""
 				time: time
 			question.equalsLabel.animate
 				properties: {opacity: 0}
@@ -343,6 +348,7 @@ createQuestion = (difficulty, level) ->
 				properties: {x: newQuestionWidth}
 				time: time
 		question.answerLayer.text = "" if not selected and not question.isAnswered
+		updateQuestionBackgroundColor animated
 		
 	question.onTap ->
 		return if question.isAnswered
@@ -521,6 +527,8 @@ createQuestion = (difficulty, level) ->
 		isCorrect = userAnswer == question.problem.answer
 		if isCorrect
 			addEphemeralIcon "images/Correct@2x.png", 68, 52, -50
+			question.isAnswered = true
+			updateQuestionBackgroundColor true
 			
 			# Let the icon come in for a moment.
 			setTimeout(->				
@@ -534,7 +542,6 @@ createQuestion = (difficulty, level) ->
 					, 900)
 				else
 					question.giveRewards()
-					setSelectedQuestion null, true
 
 					# Reveal new questions:
 					isLastAvailableQuestion = questions.length == 1
@@ -549,6 +556,8 @@ createQuestion = (difficulty, level) ->
 					questions.splice(questions.indexOf(question), 1)
 					completedQuestions.unshift(question)
 					question.isAnswered = true
+					
+					setSelectedQuestion null, true
 					
 					newQuestions = []
 					for questionNumber in [0...effectiveNumberOfQuestionsRevealed]
@@ -569,31 +578,32 @@ createQuestion = (difficulty, level) ->
 						delay = 0.1 * (effectiveNumberOfQuestionsRevealed - 1 - questionNumber)
 						newQuestionFadeAnimation = newQuestion.animate
 							properties: {opacity: 1}
-							delay: 0.4 + delay
+							delay: (if dot then 0.4 else 0.1) + delay
 							time: 0.2
 							
-						dot.parent = newQuestion.parent
-						dot.x += question.x + questionInterior.x + question.revealedQuestionContainer.x
-						dot.y += question.y
-						dot.animate
-							properties: {y: newQuestion.targetY}
-							time: 0.4
-						dot.animate
-							properties: {x: newQuestion.x}
-							time: 0.3
-							delay: 0.1 + delay
-						dot.animate
-							properties:
-								width: newQuestion.width
-								height: newQuestion.height
-								borderRadius: newQuestion.height / 2
-							time: 0.3
-							delay: 0.1 + delay
-						
-						do (dot) ->
-							newQuestionFadeAnimation.on(Events.AnimationEnd, ->
-								dot.destroy()
-							)
+						if dot
+							dot.parent = newQuestion.parent
+							dot.x += question.x + questionInterior.x + question.revealedQuestionContainer.x
+							dot.y += question.y
+							dot.animate
+								properties: {y: newQuestion.targetY}
+								time: 0.4
+							dot.animate
+								properties: {x: newQuestion.x}
+								time: 0.3
+								delay: 0.1 + delay
+							dot.animate
+								properties:
+									width: newQuestion.width
+									height: newQuestion.height
+									borderRadius: newQuestion.height / 2
+								time: 0.3
+								delay: 0.1 + delay
+							
+							do (dot) ->
+								newQuestionFadeAnimation.on(Events.AnimationEnd, ->
+									dot.destroy()
+								)
 			, 200) # in milliseconds
 		else
 			incorrectIcon = addEphemeralIcon "images/Incorrect@2x.png", 44, 44, -36
