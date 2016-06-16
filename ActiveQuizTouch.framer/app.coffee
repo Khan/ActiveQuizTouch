@@ -168,7 +168,7 @@ updateTimer = (timestamp) ->
 		timeScaleForeground.animate
 			properties:
 				x: -timeScaleBackground.width * (60 - remainingSeconds) / 60
-			time: 0.05
+			time: 0.07
 
 requestAnimationFrame updateTimer
 
@@ -427,7 +427,7 @@ createQuestion = (difficulty, level) ->
 						midX: targetLayerScreenFrame.x + rewardLayer.width * scale / 2
 						midY: targetLayerScreenFrame.y + targetLayerScreenFrame.height / 2
 						scale: scale
-					time: 0.5
+					time: 0.4
 					delay: 0.1 * rewardIndex
 				animation.on(Events.AnimationEnd, (animation) ->
 					rewardLayer.destroy()
@@ -522,13 +522,19 @@ createQuestion = (difficulty, level) ->
 			addEphemeralIcon "images/Correct@2x.png", 68, 52, -50
 			
 			# Let the icon come in for a moment.
-			setTimeout(->
-				question.giveRewards()
-				setSelectedQuestion null, true
-				
+			setTimeout(->				
 				if question.isExit
-					setGameState "levelComplete"
+					# Give rewards for all remaining unanswered questions.
+					for question in questions
+						question.giveRewards()
+
+					setTimeout(->
+						setGameState "levelComplete"
+					, 900)
 				else
+					question.giveRewards()
+					setSelectedQuestion null, true
+
 					# Reveal new questions:
 					isLastAvailableQuestion = questions.length == 1
 					effectiveNumberOfQuestionsRevealed = clip(
@@ -587,7 +593,7 @@ createQuestion = (difficulty, level) ->
 							newQuestionFadeAnimation.on(Events.AnimationEnd, ->
 								dot.destroy()
 							)
-			, 300) # in milliseconds
+			, 200) # in milliseconds
 		else
 			incorrectIcon = addEphemeralIcon "images/Incorrect@2x.png", 44, 44, -36
 			 
@@ -738,12 +744,7 @@ setGameState = (newGameState) ->
 
 		when "levelComplete"
 			pause()
-			
-			# Give rewards for all remaining unanswered questions.
-			for question in questions
-				if not question.isAnswered
-					question.giveRewards()
-		
+					
 			levelRootLayer.visible = false
 			levelCompleteLayer.visible = true
 			gameOverLayer.visible = false
