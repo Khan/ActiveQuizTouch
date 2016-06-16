@@ -526,6 +526,7 @@ createQuestion = (difficulty, level) ->
 			updateQuestionBackgroundColor true
 			
 			# Let the icon come in for a moment.
+<<<<<<< HEAD
 			setTimeout(->				
 				if question.isExit
 					# Give rewards for all remaining unanswered questions.
@@ -538,12 +539,22 @@ createQuestion = (difficulty, level) ->
 				else
 					question.giveRewards()
 
+=======
+			setTimeout(->
+				question.giveRewards()
+				setSelectedQuestion null, true
+				
+				if question.isExit
+					setGameState "levelComplete"
+				else
+>>>>>>> ec8dd815d2d63f926666369e5549b475a66bdaa5
 					# Reveal new questions:
 					isLastAvailableQuestion = questions.length == 1
 					effectiveNumberOfQuestionsRevealed = clip(
 						question.problem.questionsRevealed,
 						if isLastAvailableQuestion then 1 else 0, 
 						Infinity
+<<<<<<< HEAD
 						# Eh, maybe let's not limit it for now...?
  						# maximumNumberOfProblems(level) - questions.length
 					)
@@ -554,6 +565,18 @@ createQuestion = (difficulty, level) ->
 					
 					setSelectedQuestion null, true
 					
+=======
+# 						maximumNumberOfProblems(level) - questions.length
+					)
+					
+					print questions.indexOf(question)
+					print questions
+					questions.splice(questions.indexOf(question), 1)
+					print questions
+					completedQuestions.unshift(question)
+					question.isAnswered = true
+					
+>>>>>>> ec8dd815d2d63f926666369e5549b475a66bdaa5
 					newQuestions = []
 					for questionNumber in [0...effectiveNumberOfQuestionsRevealed]
 						# New question difficulty is based on previous question difficulty, but the difficulty level can only shift by 1 (either direction) each time, and it can never be more than 2 levels of difficult beyond the base level number.
@@ -573,6 +596,7 @@ createQuestion = (difficulty, level) ->
 						delay = 0.1 * (effectiveNumberOfQuestionsRevealed - 1 - questionNumber)
 						newQuestionFadeAnimation = newQuestion.animate
 							properties: {opacity: 1}
+<<<<<<< HEAD
 							delay: (if dot then 0.4 else 0.1) + delay
 							time: 0.2
 							
@@ -600,6 +624,36 @@ createQuestion = (difficulty, level) ->
 									dot.destroy()
 								)
 			, 200) # in milliseconds
+=======
+							delay: 0.4 + delay
+							time: 0.2
+							
+						dot.parent = newQuestion.parent
+						dot.x += question.x + questionInterior.x + question.revealedQuestionContainer.x
+						dot.y += question.y
+						dot.animate
+							properties: {y: newQuestion.targetY}
+							time: 0.4
+						dot.animate
+							properties: {x: newQuestion.x}
+							time: 0.3
+							delay: 0.1 + delay
+						dot.animate
+							properties:
+								width: newQuestion.width
+								height: newQuestion.height
+								borderRadius: newQuestion.height / 2
+							time: 0.3
+							delay: 0.1 + delay
+						
+						do (dot) ->
+							newQuestionFadeAnimation.on(Events.AnimationEnd, ->
+								dot.destroy()
+							)
+# 					setTimeout(->
+# 					, delay * 1000 + 300)
+			, 300) # in milliseconds
+>>>>>>> ec8dd815d2d63f926666369e5549b475a66bdaa5
 		else
 			incorrectIcon = addEphemeralIcon "images/Incorrect@2x.png", 44, 44, -36
 			 
