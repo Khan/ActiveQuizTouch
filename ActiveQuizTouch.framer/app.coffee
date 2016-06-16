@@ -11,6 +11,7 @@ points = 0
 currentLevel = null # 1-indexed (for convenience, because it's shown to the user)
 exitQuestionIndex = null # Tracks which question index is going to be the exit question in this level--it may not have been added yet.
 setGameState = null # Defined later; working around Framer definition ordering issues.
+gameState = null
 
 levelRootLayer = new Layer
 	width: Screen.width
@@ -150,7 +151,7 @@ updateTimer = (timestamp) ->
 	return if pauseTime != null
 	
 	remainingSeconds = clip((endTime - timestamp) / 1000, 0, 60)
-	if remainingSeconds <= 0
+	if remainingSeconds <= 0 && gameState == "level"
 		setGameState "gameOver"
 	
 	newTextualDisplayTime = Math.ceil(remainingSeconds)
@@ -652,8 +653,6 @@ createButton = (text, action) ->
 #==========================================
 # Level interstitial UI (used for level complete and game over)
 
-currentInterstitialLayer = null
-
 interstitialBackground = new Layer
 	opacity: 0
 	width: Screen.width
@@ -661,7 +660,7 @@ interstitialBackground = new Layer
 	backgroundColor: "rgba(1, 209, 193, 0.75)"
 interstitialBackground.style["-webkit-backdrop-filter"] = "blur(6px)"
 
-createInterstitial = (headerText, scoreText, timeText, buttonTitle) ->
+createInterstitial = (headerText, scoreText, timeText, buttonTitle, buttonAction) ->
 	interstitialLayer = new Layer
 		width: Screen.width
 		height: Screen.height
@@ -708,24 +707,24 @@ createInterstitial = (headerText, scoreText, timeText, buttonTitle) ->
 		width: 45*2
 		height: 45*2
 		borderRadius: 45
-		
-	interstitialTimeIcon = interstitialPointsIcon.copy()
-	interstitialTimeIcon.props =
-		parent: interstitialBoxLayer
-		backgroundColor: timeColor
-		y: 181*2
-		
-	interstitialTimeLabel = interstitialScoreLabel.copy()
-	interstitialTimeLabel.props =
-		parent: interstitialBoxLayer
-		textAlign: "center"
-		y: 233*2
-		text: timeText
+	
+	if timeText
+		interstitialTimeIcon = interstitialPointsIcon.copy()
+		interstitialTimeIcon.props =
+			parent: interstitialBoxLayer
+			backgroundColor: timeColor
+			y: 181*2
+			
+		interstitialTimeLabel = interstitialScoreLabel.copy()
+		interstitialTimeLabel.props =
+			parent: interstitialBoxLayer
+			textAlign: "center"
+			y: 233*2
+			text: timeText
 		
 	nextLevelButton = createButton buttonTitle, ->
-		currentLevel += 1
-		setGameState "level"
-		
+		buttonAction()
+				
 		levelRootLayer.x = Screen.width
 		levelRootLayer.animate
 			properties: {x: 0}
@@ -735,6 +734,9 @@ createInterstitial = (headerText, scoreText, timeText, buttonTitle) ->
 		interstitialLayer.animate
 			properties: {x: -Screen.width}
 			time: 0.3
+		.on(Events.AnimationEnd, ->
+			interstitialLayer.destroy()
+		)
 			
 		interstitialBackground.animate
 			properties: {opacity: 0}
@@ -746,6 +748,24 @@ createInterstitial = (headerText, scoreText, timeText, buttonTitle) ->
 		y: Align.bottom(-32*2)
 		
 	return interstitialLayer
+	
+presentInterstitial = (interstitialLayer) ->
+	levelRootLayer.animate
+		properties: {x: -Screen.width}
+		time: 0.45
+
+	interstitialBackground.bringToFront()
+	interstitialLayer.bringToFront()
+	interstitialLayer.x = Screen.width
+	interstitialLayer.animate
+		properties: {x: 0}
+		delay: 0.2
+		time: 0.35
+		
+	interstitialBackground.animate
+		properties: {opacity: 1}
+		delay: 0
+		time: 0.4
 
 #==========================================
 # Game over UI
@@ -785,7 +805,7 @@ levelStartingEndTime = null
 
 setGameState = (newGameState) ->
 	return if newGameState == gameState
-	
+	gameState = newGameState
 	switch newGameState
 		when "newGame"
 			currentLevel = debugStartingLevel
@@ -824,39 +844,27 @@ setGameState = (newGameState) ->
 		when "levelComplete"
 			pause()
 			
-			levelRootLayer.animate
-				properties: {x: -Screen.width}
-				time: 0.45
-
 			secondsEarned = Math.floor(Math.max(0, endTime - levelStartingEndTime) / 1000)
 
-			currentInterstitialLayer = createInterstitial(
+			presentInterstitial createInterstitial(
 				"Level #{currentLevel} Complete!",
 				"#{points} points earned!", 
 				"#{secondsEarned} seconds earned\n#{timeDisplay.text} seconds left!",
-				"Onward to Level #{currentLevel + 1}!"
+				"Onward to Level #{currentLevel + 1}!",
+				->
+					currentLevel += 1
+					setGameState "level"
 			)
-
-			interstitialBackground.bringToFront()
-			currentInterstitialLayer.bringToFront()
-			currentInterstitialLayer.x = Screen.width
-			currentInterstitialLayer.animate
-				properties: {x: 0}
-				delay: 0.15
-				time: 0.45
-				
-			interstitialBackground.animate
-				properties: {opacity: 1}
-				delay: 0
-				time: 0.5
 			
 		when "gameOver"
-			levelRootLayer.visible = false
-			gameOverLayer.visible = true
-			
-			gameOverScoreLabel.text = "Your score: " + points + " points"
-			gameOverScoreLabel.midX = gameOverLayer.midX
-	gameState = newGameState
+			presentInterstitial createInterstitial(
+				"Time's Up!",
+				"Total score: #{points} points!", 
+				null
+				"Play again",
+				->
+					setGameState "newGame"
+			)
 
 #==========================================
 # Answer Input
