@@ -638,15 +638,15 @@ createButton = (text, action) ->
 		button.states.switch "normal", time: 0.3, curve: "easeout"
 		action()
 			
-	buttonLabel = new TextLayer
+	button.buttonLabel = new TextLayer
 		parent: button
 		fontSize: 18*2
 		fontFamily: fontFamily
 		color: timeColor
 		autoSize: true
 		text: text
-	buttonLabel.midX = button.width / 2
-	buttonLabel.midY = button.height / 2
+	button.buttonLabel.midX = button.width / 2
+	button.buttonLabel.midY = button.height / 2
 	return button
 
 #==========================================
@@ -691,6 +691,16 @@ interstitialScoreLabel = new TextLayer
 	autoSize: true
 	fontFamily: fontFamily
 	fontSize: 18*2
+	
+interstitialScorePointsIcon = new Layer
+	parent: interstitialBoxLayer
+	backgroundColor: pointColor
+	opacity: 0.8
+	y: 85*2
+	midX: interstitialBoxLayer.width / 2
+	width: 45*2
+	height: 45*2
+	borderRadius: 45
 	
 nextLevelButton = createButton "Next level", ->
 	currentLevel += 1
@@ -808,11 +818,14 @@ setGameState = (newGameState) ->
 			
 			gameOverLayer.visible = false
 			
-			interstitialHeaderLabel.text = "Completed level " + currentLevel + "!"
+			interstitialHeaderLabel.text = "Level #{currentLevel} Complete!"
 			interstitialHeaderLabel.midX = interstitialBoxLayer.width / 2
 
-			interstitialScoreLabel.text = "Current score: " + points
+			interstitialScoreLabel.text = "#{points} points earned!"
 			interstitialScoreLabel.midX = interstitialBoxLayer.width / 2
+			
+			nextLevelButton.buttonLabel.text = "Onward to Level #{currentLevel + 1}!"
+			nextLevelButton.buttonLabel.midX = nextLevelButton.width / 2
 			
 		when "gameOver"
 			levelRootLayer.visible = false
