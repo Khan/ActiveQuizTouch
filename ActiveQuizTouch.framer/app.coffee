@@ -596,7 +596,6 @@ createQuestion = (difficulty, level) ->
 						delay = 0.1 * (effectiveNumberOfQuestionsRevealed - 1 - questionNumber)
 						newQuestionFadeAnimation = newQuestion.animate
 							properties: {opacity: 1}
-<<<<<<< HEAD
 							delay: (if dot then 0.4 else 0.1) + delay
 							time: 0.2
 							
@@ -624,36 +623,6 @@ createQuestion = (difficulty, level) ->
 									dot.destroy()
 								)
 			, 200) # in milliseconds
-=======
-							delay: 0.4 + delay
-							time: 0.2
-							
-						dot.parent = newQuestion.parent
-						dot.x += question.x + questionInterior.x + question.revealedQuestionContainer.x
-						dot.y += question.y
-						dot.animate
-							properties: {y: newQuestion.targetY}
-							time: 0.4
-						dot.animate
-							properties: {x: newQuestion.x}
-							time: 0.3
-							delay: 0.1 + delay
-						dot.animate
-							properties:
-								width: newQuestion.width
-								height: newQuestion.height
-								borderRadius: newQuestion.height / 2
-							time: 0.3
-							delay: 0.1 + delay
-						
-						do (dot) ->
-							newQuestionFadeAnimation.on(Events.AnimationEnd, ->
-								dot.destroy()
-							)
-# 					setTimeout(->
-# 					, delay * 1000 + 300)
-			, 300) # in milliseconds
->>>>>>> ec8dd815d2d63f926666369e5549b475a66bdaa5
 		else
 			incorrectIcon = addEphemeralIcon "images/Incorrect@2x.png", 44, 44, -36
 			 
