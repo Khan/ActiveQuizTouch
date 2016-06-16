@@ -256,6 +256,7 @@ updateQuestionLayout = (animated) ->
 		question.targetY = y
 		y += questionHeightUnselected + questionNumberSpacing
 		delay += 0.02
+	y += 80*2 - questionNumberSpacing
 	for question in completedQuestions
 		question.animate
 			properties:
