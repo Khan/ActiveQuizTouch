@@ -652,11 +652,7 @@ createButton = (text, action) ->
 #==========================================
 # Level interstitial UI (used for level complete and game over)
 
-interstitialLayer = new Layer
-	width: Screen.width
-	height: Screen.height
-	x: Screen.width
-	backgroundColor: ""
+currentInterstitialLayer = null
 
 interstitialBackground = new Layer
 	opacity: 0
@@ -665,78 +661,91 @@ interstitialBackground = new Layer
 	backgroundColor: "rgba(1, 209, 193, 0.75)"
 interstitialBackground.style["-webkit-backdrop-filter"] = "blur(6px)"
 
-interstitialBoxLayer = new Layer
-	parent: interstitialLayer
-	width: Screen.width - 32*4
-	height: Screen.height - 116*4
-	x: 32*2
-	midY: Screen.height / 2
-	backgroundColor: "rgba(250, 250, 250, 0.95)"
-	borderRadius: 4*2
-	shadowBlur: 70*2
-	shadowColor: "rgba(0, 0, 0, 0.5)"
+createInterstitial = (headerText, scoreText, timeText, buttonTitle) ->
+	interstitialLayer = new Layer
+		width: Screen.width
+		height: Screen.height
+		x: Screen.width
+		backgroundColor: ""
 
-interstitialHeaderLabel = new TextLayer
-	parent: interstitialBoxLayer
-	color: darkTextColor
-	y: 28*2
-	autoSize: true
-	fontFamily: fontFamily
-	fontSize: 30*2
-
-interstitialScoreLabel = new TextLayer
-	parent: interstitialBoxLayer
-	color: darkTextColor
-	width: interstitialBoxLayer.width
-	y: 137*2
-	textAlign: "center"
-	fontFamily: fontFamily
-	fontSize: 18*2
+	interstitialBoxLayer = new Layer
+		parent: interstitialLayer
+		width: Screen.width - 32*4
+		height: Screen.height - 116*4
+		x: 32*2
+		midY: Screen.height / 2
+		backgroundColor: "rgba(250, 250, 250, 0.95)"
+		borderRadius: 4*2
+		shadowBlur: 70*2
+		shadowColor: "rgba(0, 0, 0, 0.5)"
 	
-interstitialPointsIcon = new Layer
-	parent: interstitialBoxLayer
-	backgroundColor: pointColor
-	opacity: 0.8
-	y: 85*2
-	midX: interstitialBoxLayer.width / 2
-	width: 45*2
-	height: 45*2
-	borderRadius: 45
+	interstitialHeaderLabel = new TextLayer
+		parent: interstitialBoxLayer
+		color: darkTextColor
+		y: 28*2
+		width: interstitialBoxLayer.width
+		textAlign: "center"
+		fontFamily: fontFamily
+		fontSize: 30*2
+		text: headerText
 	
-interstitialTimeIcon = interstitialPointsIcon.copy()
-interstitialTimeIcon.props =
-	parent: interstitialBoxLayer
-	backgroundColor: timeColor
-	y: 181*2
-	
-interstitialTimeLabel = interstitialScoreLabel.copy()
-interstitialTimeLabel.props =
-	parent: interstitialBoxLayer
-	textAlign: "center"
-	y: 233*2
-	
-nextLevelButton = createButton "Next level", ->
-	currentLevel += 1
-	setGameState "level"
-	
-	levelRootLayer.x = Screen.width
-	levelRootLayer.animate
-		properties: {x: 0}
-		delay: 0.15
-		time: 0.3
-	
-	interstitialLayer.animate
-		properties: {x: -Screen.width}
-		time: 0.3
+	interstitialScoreLabel = new TextLayer
+		parent: interstitialBoxLayer
+		color: darkTextColor
+		width: interstitialBoxLayer.width
+		y: 137*2
+		textAlign: "center"
+		fontFamily: fontFamily
+		fontSize: 18*2
+		text: scoreText
 		
-	interstitialBackground.animate
-		properties: {opacity: 0}
-		time: 0.2
-	
-nextLevelButton.props =
-	parent: interstitialBoxLayer
-	midX: interstitialBoxLayer.width / 2
-	y: Align.bottom(-32*2)
+	interstitialPointsIcon = new Layer
+		parent: interstitialBoxLayer
+		backgroundColor: pointColor
+		opacity: 0.8
+		y: 85*2
+		midX: interstitialBoxLayer.width / 2
+		width: 45*2
+		height: 45*2
+		borderRadius: 45
+		
+	interstitialTimeIcon = interstitialPointsIcon.copy()
+	interstitialTimeIcon.props =
+		parent: interstitialBoxLayer
+		backgroundColor: timeColor
+		y: 181*2
+		
+	interstitialTimeLabel = interstitialScoreLabel.copy()
+	interstitialTimeLabel.props =
+		parent: interstitialBoxLayer
+		textAlign: "center"
+		y: 233*2
+		text: timeText
+		
+	nextLevelButton = createButton buttonTitle, ->
+		currentLevel += 1
+		setGameState "level"
+		
+		levelRootLayer.x = Screen.width
+		levelRootLayer.animate
+			properties: {x: 0}
+			delay: 0.15
+			time: 0.3
+		
+		interstitialLayer.animate
+			properties: {x: -Screen.width}
+			time: 0.3
+			
+		interstitialBackground.animate
+			properties: {opacity: 0}
+			time: 0.2
+		
+	nextLevelButton.props =
+		parent: interstitialBoxLayer
+		midX: interstitialBoxLayer.width / 2
+		y: Align.bottom(-32*2)
+		
+	return interstitialLayer
 
 #==========================================
 # Game over UI
@@ -819,10 +828,19 @@ setGameState = (newGameState) ->
 				properties: {x: -Screen.width}
 				time: 0.45
 
+			secondsEarned = Math.floor(Math.max(0, endTime - levelStartingEndTime) / 1000)
+
+			currentInterstitialLayer = createInterstitial(
+				"Level #{currentLevel} Complete!",
+				"#{points} points earned!", 
+				"#{secondsEarned} seconds earned\n#{timeDisplay.text} seconds left!",
+				"Onward to Level #{currentLevel + 1}!"
+			)
+
 			interstitialBackground.bringToFront()
-			interstitialLayer.bringToFront()
-			interstitialLayer.x = Screen.width
-			interstitialLayer.animate
+			currentInterstitialLayer.bringToFront()
+			currentInterstitialLayer.x = Screen.width
+			currentInterstitialLayer.animate
 				properties: {x: 0}
 				delay: 0.15
 				time: 0.45
@@ -832,24 +850,8 @@ setGameState = (newGameState) ->
 				delay: 0
 				time: 0.5
 			
-			gameOverLayer.visible = false
-			
-			interstitialHeaderLabel.text = "Level #{currentLevel} Complete!"
-			interstitialHeaderLabel.midX = interstitialBoxLayer.width / 2
-
-			interstitialScoreLabel.text = "#{points} points earned!"
-			interstitialScoreLabel.midX = interstitialBoxLayer.width / 2
-			
-			secondsEarned = Math.floor(Math.max(0, endTime - levelStartingEndTime) / 1000)
-			interstitialTimeLabel.text = "#{secondsEarned} seconds earned\n#{timeDisplay.text} seconds left!"
-			interstitialTimeLabel.midX = interstitialBoxLayer.width / 2
-			
-			nextLevelButton.buttonLabel.text = "Onward to Level #{currentLevel + 1}!"
-			nextLevelButton.buttonLabel.midX = nextLevelButton.width / 2
-			
 		when "gameOver"
 			levelRootLayer.visible = false
-			levelCompleteLayer.visible = false
 			gameOverLayer.visible = true
 			
 			gameOverScoreLabel.text = "Your score: " + points + " points"
