@@ -692,7 +692,7 @@ interstitialScoreLabel = new TextLayer
 	fontFamily: fontFamily
 	fontSize: 18*2
 	
-interstitialScorePointsIcon = new Layer
+interstitialPointsIcon = new Layer
 	parent: interstitialBoxLayer
 	backgroundColor: pointColor
 	opacity: 0.8
@@ -701,6 +701,12 @@ interstitialScorePointsIcon = new Layer
 	width: 45*2
 	height: 45*2
 	borderRadius: 45
+	
+interstitialTimeIcon = interstitialPointsIcon.copy()
+interstitialTimeIcon.props =
+	parent: interstitialBoxLayer
+	backgroundColor: timeColor
+	y: 181*2
 	
 nextLevelButton = createButton "Next level", ->
 	currentLevel += 1
