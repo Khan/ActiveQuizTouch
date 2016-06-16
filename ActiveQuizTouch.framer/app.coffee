@@ -621,13 +621,16 @@ createQuestion = (difficulty, level) ->
 
 createButton = (text, action) ->
 	button = new Layer
-		width: Screen.width
-		height: 100
+		width: 220*2
+		height: 55*2
+		borderRadius: 55
+		borderColor: timeColor
+		borderWidth: 1
 	button.states.add
 		normal:
-			backgroundColor: "rgba(240, 241, 242, 0.5)"
+			backgroundColor: ""
 		highlight:
-			backgroundColor: "rgba(240, 241, 242, 0.6)"
+			backgroundColor: "rgba(1, 209, 193, 0.1)"
 	button.states.switchInstant "normal"
 	button.onTouchStart ->
 		button.states.switch "highlight", time: 0.1, curve: "easeout"
@@ -637,9 +640,9 @@ createButton = (text, action) ->
 			
 	buttonLabel = new TextLayer
 		parent: button
-		fontSize: 48
+		fontSize: 18*2
 		fontFamily: fontFamily
-		color: whiteColor
+		color: timeColor
 		autoSize: true
 		text: text
 	buttonLabel.midX = button.width / 2
@@ -709,7 +712,7 @@ nextLevelButton = createButton "Next level", ->
 	
 nextLevelButton.props =
 	parent: interstitialBoxLayer
-	width: interstitialBoxLayer.width
+	midX: interstitialBoxLayer
 	y: Align.bottom(-32*2)
 
 #==========================================
