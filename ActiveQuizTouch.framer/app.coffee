@@ -28,6 +28,7 @@ clip = (value, min, max) ->
 medGray = "rgba(216,216,216,1)"
 lightGray = "rgba(227,229,230,1)"
 darkGray = "rgba(98,101,105,1)"
+darkTextColor = "rgba(59,62,64,1)"
 pointColor = "rgba(255,190,38,1)"
 timeColor = "rgba(1,209,193,1)"
 selectColor = "rgba(240, 241, 242, 0.8)"
@@ -652,34 +653,55 @@ createButton = (text, action) ->
 	return button
 
 #==========================================
-# Level complete UI
+# Level interstitial UI (used for level complete and game over)
 
-levelCompleteLayer = new Layer
+interstitialLayer = new Layer
 	width: Screen.width
 	height: Screen.height
-	visible: false
+	x: Screen.width
 	backgroundColor: ""
-levelCompleteLabel = new TextLayer
-	parent: levelCompleteLayer
-	color: "white"
-	y: 300
-	autoSize: true
-	fontFamily: fontFamily
-	fontSize: 80
 
-levelCompleteScoreLabel = new TextLayer
-	parent: levelCompleteLayer
-	color: "white"
-	y: 500
+interstitialBackground = new Layer
+	opacity: 0
+	width: Screen.width
+	height: Screen.height
+	backgroundColor: "rgba(1, 209, 193, 0.75)"
+interstitialBackground.style["-webkit-backdrop-filter"] = "blur(6px)"
+
+interstitialBoxLayer = new Layer
+	parent: interstitialLayer
+	width: Screen.width - 32*4
+	height: Screen.height - 116*4
+	x: 32*2
+	midY: Screen.height / 2
+	backgroundColor: "rgba(250, 250, 250, 0.95)"
+	borderRadius: 4*2
+	shadowBlur: 70*2
+	shadowColor: "rgba(0, 0, 0, 0.5)"
+
+interstitialHeaderLabel = new TextLayer
+	parent: interstitialBoxLayer
+	color: darkTextColor
+	y: 28*2
 	autoSize: true
 	fontFamily: fontFamily
-	fontSize: 48
+	fontSize: 30*2
+
+interstitialScoreLabel = new TextLayer
+	parent: interstitialBoxLayer
+	color: darkTextColor
+	y: 137*2
+	autoSize: true
+	fontFamily: fontFamily
+	fontSize: 18*2
 	
 nextLevelButton = createButton "Next level", ->
 	currentLevel += 1
 	setGameState "level"
-nextLevelButton.parent = levelCompleteLayer
-nextLevelButton.y = 700
+nextLevelButton.props =
+	parent: interstitialBoxLayer
+	width: interstitialBoxLayer.width
+	y: Align.bottom(-32*2)
 
 #==========================================
 # Game over UI
@@ -736,7 +758,6 @@ setGameState = (newGameState) ->
 			completedQuestions = []
 			
 			levelRootLayer.visible = true
-			levelCompleteLayer.visible = false
 			gameOverLayer.visible = false
 			
 			levelDisplay.text = "Level #{currentLevel}"
@@ -755,16 +776,30 @@ setGameState = (newGameState) ->
 
 		when "levelComplete"
 			pause()
-					
-			levelRootLayer.visible = false
-			levelCompleteLayer.visible = true
+			
+			levelRootLayer.animate
+				properties: {x: -Screen.width}
+				time: 0.45
+
+			interstitialBackground.bringToFront()
+			interstitialLayer.bringToFront()
+			interstitialLayer.animate
+				properties: {x: 0}
+				delay: 0.15
+				time: 0.45
+				
+			interstitialBackground.animate
+				properties: {opacity: 1}
+				delay: 0
+				time: 0.5
+			
 			gameOverLayer.visible = false
 			
-			levelCompleteLabel.text = "Completed level " + currentLevel + "!"
-			levelCompleteLabel.midX = levelCompleteLayer.midX
+			interstitialHeaderLabel.text = "Completed level " + currentLevel + "!"
+			interstitialHeaderLabel.midX = interstitialBoxLayer.width / 2
 
-			levelCompleteScoreLabel.text = "Current score: " + points
-			levelCompleteScoreLabel.midX = levelCompleteLayer.midX
+			interstitialScoreLabel.text = "Current score: " + points
+			interstitialScoreLabel.midX = interstitialBoxLayer.width / 2
 			
 		when "gameOver"
 			levelRootLayer.visible = false
@@ -785,7 +820,6 @@ updatePendingNumber = (updateFunction) ->
 # Keyboard
 
 keyboardContainer = new Layer
-	parent: levelRootLayer
 	y: Screen.height - keyboardHeight - 1
 	width: Screen.width
 	height: keyboardHeight + 1
