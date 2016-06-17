@@ -527,6 +527,7 @@ createQuestion = (difficulty, level) ->
 			updateQuestionBackgroundColor true
 			
 			# Let the icon come in for a moment.
+			pause() # But stop the clock before then!
 			setTimeout(->				
 				if question.isExit
 					# Give rewards for all remaining unanswered questions.
@@ -535,7 +536,7 @@ createQuestion = (difficulty, level) ->
 
 					setTimeout(->
 						setGameState "levelComplete"
-					, 900)
+					, 500)
 				else
 					question.giveRewards()
 
@@ -802,6 +803,7 @@ retryButton.y = 700
 # Game state
 
 levelStartingEndTime = null
+levelStartingPoints = null
 
 setGameState = (newGameState) ->
 	return if newGameState == gameState
@@ -838,22 +840,24 @@ setGameState = (newGameState) ->
 			if debugShouldSpawnManyQuestions
 				addQuestion createQuestion(currentLevel + Utils.randomChoice([0, 1, 2]), currentLevel) for _ in [0..5]
 			
-			unpause()
 			levelStartingEndTime = endTime
+			levelStartingPoints = points
 
-		when "levelComplete"
-			pause()
-			
+		when "levelComplete"			
 			secondsEarned = Math.floor(Math.max(0, endTime - levelStartingEndTime) / 1000)
 
 			presentInterstitial createInterstitial(
 				"Level #{currentLevel} Complete!",
-				"#{points} points earned!", 
+				"#{points - levelStartingPoints} points earned!", 
 				"#{secondsEarned} seconds earned\n#{timeDisplay.text} seconds left!",
 				"Onward to Level #{currentLevel + 1}!",
 				->
 					currentLevel += 1
 					setGameState "level"
+					# Don't unpause for a moment: there are animations.
+					setTimeout(->
+						unpause()
+					, 1000)
 			)
 			
 		when "gameOver"
