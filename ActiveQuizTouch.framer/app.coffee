@@ -40,12 +40,7 @@ transparent = "rgba(0,0,0,0)"
 questionBorderColorSelected = whiteColor
 questionBorderColorUnselected = "rgba(250, 250, 250, 0.8)"
 
-fontFamily = "ProximaNovaRegular"
-
-customFontStyle = document.createElement("style")
-customFontCSS = "@font-face{font-family:#{fontFamily};src:url(ProximaNova-Reg-webfont.ttf);}"
-customFontStyle.appendChild(document.createTextNode(customFontCSS))
-document.head.appendChild(customFontStyle)
+fontFamily = "Avenir, HelveticaNeue, Helvetia, sans-serif"
 
 background = new Layer
 	width: Screen.width,
