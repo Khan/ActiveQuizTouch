@@ -142,11 +142,12 @@ unpause = ->
 
 updateTimer = (timestamp) ->
 	requestAnimationFrame updateTimer
-
-	return if pauseTime != null
 	
-	remainingSeconds = clip((endTime - timestamp) / 1000, 0, 60)
-	if remainingSeconds <= 0 && gameState == "level"
+	remainingSeconds = (endTime - timestamp) / 1000
+	if pauseTime != null
+		remainingSeconds = pauseTime / 1000
+	
+	if remainingSeconds <= 0 && gameState == "level" && pauseTime == null
 		setGameState "gameOver"
 	
 	newTextualDisplayTime = Math.ceil(remainingSeconds)
@@ -156,16 +157,19 @@ updateTimer = (timestamp) ->
 		timeDisplay.calcSize()
 		timeDisplay.maxX = Screen.width - levelDisplay.x
 		
-		timeScaleForeground.animate
-			properties:
-				x: -timeScaleBackground.width * (60 - remainingSeconds) / 60
-			time: 0.07
+	timeScaleForeground.animate
+		properties:
+			x: -timeScaleBackground.width * (60 - remainingSeconds) / 60
+		time: 0.07
 
 requestAnimationFrame updateTimer
 
 
 addTime = (extraSeconds) ->
-	endTime += extraSeconds * 1000
+	now = performance.now()
+	endTime = clip(endTime + extraSeconds * 1000, now, now + 60*1000)
+	if pauseTime != null
+		pauseTime = clip(pauseTime + extraSeconds * 1000, 0, 60*1000)
 
 #==========================================
 # Problem Generation
@@ -522,7 +526,7 @@ createQuestion = (difficulty, level) ->
 			updateQuestionBackgroundColor true
 			
 			# Let the icon come in for a moment.
-			pause() # But stop the clock before then!
+			pause() if question.isExit # But stop the clock before then!
 			setTimeout(->				
 				if question.isExit
 					# Give rewards for all remaining unanswered questions.

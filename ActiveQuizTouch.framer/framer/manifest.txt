@@ -58,4 +58,3 @@ images/Incorrect@2x.png
 index.html
 modules/myModule.coffee
 modules/TextLayer.coffee
-ProximaNova-Reg-webfont.ttf
