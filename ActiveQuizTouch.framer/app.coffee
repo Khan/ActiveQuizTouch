@@ -238,6 +238,7 @@ addQuestion = (newQuestion, animated) ->
 		
 	questions.unshift(newQuestion)
 	newQuestion.x = Math.floor(Utils.randomNumber(56*2, 93*2))
+	newQuestion.updateQuestionsRevealed false
 	updateQuestionLayout animated
 	
 updateQuestionLayout = (animated) ->	
@@ -442,30 +443,7 @@ createQuestion = (difficulty, level) ->
 							addTime 3
 				)
 		question.rewardLayers.push rewardLayer
-		
-	# Make revealed question circles
-	question.revealedQuestionContainer = new Layer
-		parent: questionInterior
-		backgroundColor: ""
-		x: questionInterior.width
-	question.revealedQuestionDots = []
-	revealedQuestionDotX = -11*2
-	for questionIndex in [0...question.problem.questionsRevealed]
-		size = 45*2 - questionIndex*10*2
-		revealedQuestionLayer = new Layer
-			parent: question.revealedQuestionContainer
-			width: size
-			height: size
-			borderRadius: size/2
-			opacity: 0.6 - 0.1*questionIndex
-			borderColor: whiteColor
-			borderWidth: 1
-			backgroundColor: ""
-			x: revealedQuestionDotX
-		revealedQuestionLayer.midY = questionInterior.height / 2
-		revealedQuestionDotX += size - 11*2
-		question.revealedQuestionDots.push(revealedQuestionLayer)
-			
+					
 	question.questionBorder = new Layer
 		parent: questionInterior
 		borderColor: questionBorderColorUnselected
@@ -496,6 +474,72 @@ createQuestion = (difficulty, level) ->
 		for rewardLayer in question.rewardLayers
 			rewardLayer.giveReward()
 
+	# Make revealed question circles
+	question.revealedQuestionContainer = new Layer
+		parent: questionInterior
+		backgroundColor: ""
+		x: questionInterior.width
+
+	question.revealedQuestionDots = []
+	
+	# This is kind of an interesting thing: the number of questions a question might reveal may change over time... so we need to be able to update the number of dots displayed.
+	question.updateQuestionsRevealed = (animated) ->
+		isLastAvailableQuestion = questions.length <= 1
+		effectiveNumberOfQuestionsRevealed = clip(
+			question.problem.questionsRevealed,
+			if isLastAvailableQuestion then 1 else 0, 
+			maximumNumberOfProblems(level) - (questions.length + completedQuestions.length)
+		)
+		
+		effectiveNumberOfQuestionsRevealed = 0 if question.isExit
+		
+		revealedQuestionDots = []
+		revealedQuestionDotX = -11*2
+		for questionIndex in [0...effectiveNumberOfQuestionsRevealed]
+			size = 45*2 - questionIndex*10*2
+			revealedQuestionLayer = new Layer
+				parent: question.revealedQuestionContainer
+				width: size
+				height: size
+				borderRadius: size/2
+				opacity: 0.6 - 0.1*questionIndex
+				borderColor: whiteColor
+				borderWidth: 1
+				backgroundColor: ""
+				x: revealedQuestionDotX
+			revealedQuestionLayer.midY = questionInterior.height / 2
+			revealedQuestionDotX += size - 11*2
+			revealedQuestionDots.push(revealedQuestionLayer)
+		
+		oldDotCount = question.revealedQuestionDots.length
+		newDotCount = revealedQuestionDots.length
+		
+		if newDotCount >= oldDotCount
+			# Animate in all the newborn dots
+			for newDotIndex in [oldDotCount...newDotCount]
+				dot = revealedQuestionDots[newDotIndex]
+				do (dot) ->
+					dot.opacity = 0
+					dot.animate
+						properties: {opacity: 1}
+						time: if animated then 0.1 else 0
+			oldDot.destroy() for oldDot in question.revealedQuestionDots
+		else
+			# Animate out all the dying dots
+			for oldDotIndex in [newDotCount...oldDotCount]
+				dot = question.revealedQuestionDots[oldDotIndex]
+				do (dot) ->
+					dot.animate
+						properties: {opacity: 0}
+						time: 0.1
+					.on(Events.AnimationEnd, ->
+						dot.destroy()
+					)
+			oldDot.destroy() for oldDot in question.revealedQuestionDots[0...newDotCount]
+				
+		question.revealedQuestionDots = revealedQuestionDots
+	question.updateQuestionsRevealed false
+
 	# For correct / incorrect
 	addEphemeralIcon = (iconName, width, height, rightMargin) ->
 		iconLayer = new Layer
@@ -515,7 +559,7 @@ createQuestion = (difficulty, level) ->
 			curve: "spring(400, 50, 100)"
 		
 		return iconLayer
-
+			
 	question.submit = ->
 		return if question.isAnswered
 		
@@ -539,23 +583,17 @@ createQuestion = (difficulty, level) ->
 					, 500)
 				else
 					question.giveRewards()
-
-					# Reveal new questions:
-					isLastAvailableQuestion = questions.length == 1
-					effectiveNumberOfQuestionsRevealed = clip(
-						question.problem.questionsRevealed,
-						if isLastAvailableQuestion then 1 else 0, 
-						Infinity
-						# Eh, maybe let's not limit it for now...?
- 						# maximumNumberOfProblems(level) - questions.length
-					)
 					
 					questions.splice(questions.indexOf(question), 1)
 					completedQuestions.unshift(question)
 					question.isAnswered = true
 					
+					otherQuestion.updateQuestionsRevealed true for otherQuestion in questions
+					
 					setSelectedQuestion null, true
 					
+					# Reveal new questions:
+					effectiveNumberOfQuestionsRevealed = question.revealedQuestionDots.length
 					newQuestions = []
 					for questionNumber in [0...effectiveNumberOfQuestionsRevealed]
 						# New question difficulty is based on previous question difficulty, but the difficulty level can only shift by 1 (either direction) each time, and it can never be more than 2 levels of difficult beyond the base level number.
@@ -617,6 +655,9 @@ createQuestion = (difficulty, level) ->
 			question.ghostifyAnswer()
 		
 	question.setSelected false, false
+	
+	# Update the base question's size based on the prompt size.
+	question.width = Math.max(question.promptLayer.maxX + questionRightPadding, questionWidthUnselected)
 	
 	return question	
 
