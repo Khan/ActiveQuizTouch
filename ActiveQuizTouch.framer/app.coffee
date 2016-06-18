@@ -847,6 +847,7 @@ retryButton.y = 700
 
 levelStartingEndTime = null
 levelStartingPoints = null
+highScore = 0
 
 setGameState = (newGameState) ->
 	return if newGameState == gameState
@@ -905,10 +906,15 @@ setGameState = (newGameState) ->
 			)
 			
 		when "gameOver"
+			scoreString = if points > highScore
+				highScore = points
+				"New personal best!\nTotal score: #{points} points"
+			else
+				"Total score: #{points} points\nPersonal best: #{highScore} points"
 			presentInterstitial createInterstitial(
 				300*2,
 				"Time's Up!",
-				"Total score: #{points} points!", 
+				scoreString,
 				null
 				"Play again",
 				->
