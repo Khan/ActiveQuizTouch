@@ -234,6 +234,11 @@ setSelectedQuestion = (newSelectedQuestion, animated) ->
 questions = []
 completedQuestions = []
 
+updateAllQuestionsFloat = ->
+	requestAnimationFrame updateAllQuestionsFloat
+	question.updateFloat() for question in questions
+requestAnimationFrame updateAllQuestionsFloat
+
 addQuestion = (newQuestion, animated) ->
 	if questions.length + completedQuestions.length == exitQuestionIndex
 		# That means we're about to add the end question! Neat!
@@ -541,6 +546,37 @@ createQuestion = (difficulty, level) ->
 			oldDot.destroy() for oldDot in question.revealedQuestionDots[0...newDotCount]
 				
 		question.revealedQuestionDots = revealedQuestionDots
+		
+	question.phase = Utils.randomNumber(0, 2 * Math.PI)
+	question.updateFloat = ->
+		periodX = 700 + Math.random(0, 100)
+		periodY = 2000 + Math.random(0, 200)
+		phase = question.phase
+		amplitudeX = 0.04
+		amplitudeY = 0.06
+		questionInteriorDeltaX = Math.sin(performance.now() / periodX + phase) * amplitudeX / 2
+		questionInteriorDeltaY = Math.sin(performance.now() / periodY + phase) * amplitudeY / 2
+		questionInterior.x += questionInteriorDeltaX
+		questionInterior.y += questionInteriorDeltaY
+		systemX = 0
+		systemY = 0
+		for rewardLayerIndex in [0...question.rewardLayers.length]
+			phase += rewardLayerIndex
+			rewardLayer = question.rewardLayers[rewardLayerIndex]
+			systemX += Math.sin(performance.now() / periodX + phase) * amplitudeX
+			systemY += Math.sin(performance.now() / periodY + phase) * amplitudeY
+			rewardLayer.x += systemX
+			rewardLayer.y += systemY
+		systemX = 0
+		systemY = 0
+		for revealedQuestionIndex in [0...question.revealedQuestionDots.length]
+			phase += revealedQuestionIndex
+			revealedQuestionDot = question.revealedQuestionDots[revealedQuestionIndex]
+			systemX += Math.sin(performance.now() / periodX + phase) * amplitudeX
+			systemY += Math.sin(performance.now() / periodY + phase) * amplitudeY
+			revealedQuestionDot.x += systemX
+			revealedQuestionDot.y += systemY
+		
 	question.updateQuestionsRevealed false
 
 	# For correct / incorrect
