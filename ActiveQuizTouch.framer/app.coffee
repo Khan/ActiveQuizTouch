@@ -736,21 +736,30 @@ createInterstitial = (height, headerText, scoreText, timeText, buttonTitle, butt
 		parent: interstitialBoxLayer
 		color: darkTextColor
 		width: interstitialBoxLayer.width
-		y: 137*2
+		y: if scoreText then 137*2 else 85*2
 		textAlign: "center"
 		fontFamily: fontFamily
 		fontSize: 18*2
-		text: scoreText
+		text: scoreText || ""
 		
-	interstitialPointsIcon = new Layer
-		parent: interstitialBoxLayer
-		backgroundColor: pointColor
-		opacity: 0.8
-		y: 85*2
-		midX: interstitialBoxLayer.width / 2
-		width: 45*2
-		height: 45*2
-		borderRadius: 45
+	if scoreText
+		interstitialPointsIcon = new Layer
+			parent: interstitialBoxLayer
+			backgroundColor: pointColor
+			opacity: 0.8
+			y: 85*2
+			midX: interstitialBoxLayer.width / 2
+			width: 45*2
+			height: 45*2
+			borderRadius: 45
+	else
+		interstitialLayer.interior = new Layer
+			parent: interstitialBoxLayer
+			backgroundColor: ""
+			width: interstitialBoxLayer.width - 19*4
+			height: height
+			x: 19*2
+			y: 80*2
 	
 	if timeText
 		interstitialTimeIcon = interstitialPointsIcon.copy()
@@ -793,23 +802,22 @@ createInterstitial = (height, headerText, scoreText, timeText, buttonTitle, butt
 		
 	return interstitialLayer
 	
-presentInterstitial = (interstitialLayer) ->
+presentInterstitial = (interstitialLayer, animated) ->
 	levelRootLayer.animate
 		properties: {x: -Screen.width}
-		time: 0.45
+		time: if animated then 0.45 else 0
 
 	interstitialBackground.bringToFront()
 	interstitialLayer.bringToFront()
 	interstitialLayer.x = Screen.width
 	interstitialLayer.animate
 		properties: {x: 0}
-		delay: 0.2
-		time: 0.35
+		delay: if animated then 0.2 else 0
+		time: if animated then 0.35 else 0
 		
 	interstitialBackground.animate
 		properties: {opacity: 1}
-		delay: 0
-		time: 0.4
+		time: if animated then 0.4 else 0
 
 #==========================================
 # Game over UI
@@ -853,6 +861,42 @@ setGameState = (newGameState) ->
 	return if newGameState == gameState
 	gameState = newGameState
 	switch newGameState
+		when "welcome"
+			welcomeInterstitial = createInterstitial(
+				530*2,
+				"Welcome!",
+				null,
+				null,
+				"Let's play!", ->
+					setGameState "newGame"
+			)
+			welcomeInterstitial.interior.html = """
+			This prototype explores facilitating
+			player “flow” by offering choice.<br /><br />
+			
+			It’s based on the thesis of <a href="http://www.jenovachen.com" target="_blank">Jenova
+			Chen</a>, which included a prototype
+			called <a href="http://jenovachen.com/flowingames/implementations/math/index.htm" target="_blank">ActiveQuiz</a>. He previously
+			helped create <a href="http://thatgamecompany.com/games/flow/" target="_blank">Flow</a> and <a href="http://thatgamecompany.com/games/journey/" target="_blank">Journey</a>.<br /><br />
+			
+			For the best experience, add this web page to your home screen.<br /><br />
+			
+			For feedback, please <a href="mailto:andy@khanacademy.org,mayli@khanacademy.org?cc=long-term-research-team-blackhole@khanacademy.org">email us</a>.<br /><br />
+			
+			Thank you! <br />
+			&mdash; May-Li and Andy, <a href="http://klr.tumblr.com" target="_blank">KLR</a><br />
+			"""
+			style = document.createElement('style');
+			style.type = 'text/css';
+			style.appendChild(document.createTextNode("a { color: #{timeColor}; text-decoration: none; }"));
+			document.getElementsByTagName('head')[0].appendChild(style);
+			welcomeInterstitial.interior.style =
+				"fontFamily": fontFamily
+				"fontSize": "#{17*2}px"
+				"color": darkTextColor
+				"lineHeight": "#{22*2}px"
+				"pointerEvents": "auto"
+			presentInterstitial welcomeInterstitial, false
 		when "newGame"
 			currentLevel = debugStartingLevel
 			endTime = performance.now() + startingClockTimeInSeconds * 1000
@@ -903,7 +947,7 @@ setGameState = (newGameState) ->
 					setTimeout(->
 						unpause()
 					, 1000)
-			)
+			), true
 			
 		when "gameOver"
 			scoreString = if points > highScore
@@ -919,7 +963,7 @@ setGameState = (newGameState) ->
 				"Play again",
 				->
 					setGameState "newGame"
-			)
+			), true
 
 #==========================================
 # Answer Input
@@ -1078,4 +1122,4 @@ noSelectionKeyboardOverlayLabel = new TextLayer
 noSelectionKeyboardOverlayLabel.midX = keyboard.midX
 noSelectionKeyboardOverlayLabel.midY = keyboard.height / 2
 
-setGameState "newGame"
+setGameState "welcome"
