@@ -146,6 +146,8 @@ unpause = ->
 updateTimer = (timestamp) ->
 	requestAnimationFrame updateTimer
 	
+	return if endTime == Infinity
+	
 	remainingSeconds = (endTime - timestamp) / 1000
 	if pauseTime != null
 		remainingSeconds = pauseTime / 1000
