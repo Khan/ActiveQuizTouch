@@ -704,7 +704,7 @@ interstitialBackground = new Layer
 	backgroundColor: "rgba(1, 209, 193, 0.75)"
 interstitialBackground.style["-webkit-backdrop-filter"] = "blur(6px)"
 
-createInterstitial = (headerText, scoreText, timeText, buttonTitle, buttonAction) ->
+createInterstitial = (height, headerText, scoreText, timeText, buttonTitle, buttonAction) ->
 	interstitialLayer = new Layer
 		width: Screen.width
 		height: Screen.height
@@ -714,7 +714,7 @@ createInterstitial = (headerText, scoreText, timeText, buttonTitle, buttonAction
 	interstitialBoxLayer = new Layer
 		parent: interstitialLayer
 		width: Screen.width - 32*4
-		height: Screen.height - 116*4
+		height: height
 		x: 32*2
 		midY: Screen.height / 2
 		backgroundColor: "rgba(250, 250, 250, 0.95)"
@@ -890,6 +890,7 @@ setGameState = (newGameState) ->
 			secondsEarned = Math.floor(Math.max(0, endTime - levelStartingEndTime) / 1000)
 
 			presentInterstitial createInterstitial(
+				419*2,
 				"Level #{currentLevel} Complete!",
 				"#{points - levelStartingPoints} points earned!", 
 				"#{secondsEarned} seconds earned\n#{timeDisplay.text} seconds left!",
@@ -905,6 +906,7 @@ setGameState = (newGameState) ->
 			
 		when "gameOver"
 			presentInterstitial createInterstitial(
+				300*2,
 				"Time's Up!",
 				"Total score: #{points} points!", 
 				null
