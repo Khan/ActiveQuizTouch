@@ -3,6 +3,7 @@
 # Set this to true to cause many questions to be spawned when the level starts.
 debugShouldSpawnManyQuestions = false
 debugStartingLevel = 1
+debugSkipWelcome = false
 
 #==========================================
 # Initial state 
@@ -1122,4 +1123,4 @@ noSelectionKeyboardOverlayLabel = new TextLayer
 noSelectionKeyboardOverlayLabel.midX = keyboard.midX
 noSelectionKeyboardOverlayLabel.midY = keyboard.height / 2
 
-setGameState "welcome"
+setGameState if debugSkipWelcome then "newGame" else "welcome"
