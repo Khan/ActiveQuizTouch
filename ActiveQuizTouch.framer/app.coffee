@@ -4,6 +4,7 @@
 debugShouldSpawnManyQuestions = false
 debugStartingLevel = 1
 debugSkipWelcome = false
+debugUnlimitedTime = false
 
 #==========================================
 # Initial state 
@@ -149,7 +150,7 @@ updateTimer = (timestamp) ->
 	if pauseTime != null
 		remainingSeconds = pauseTime / 1000
 	
-	if remainingSeconds <= 0 && gameState == "level" && pauseTime == null
+	if remainingSeconds <= 0 && gameState == "level" && pauseTime == null && (not debugUnlimitedTime)
 		setGameState "gameOver"
 	
 	newTextualDisplayTime = Math.ceil(remainingSeconds)
