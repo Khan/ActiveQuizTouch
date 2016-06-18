@@ -61,6 +61,7 @@ questionBorderWidthSelected = 3 * 2
 questionPromptSize = 28*2
 questionNumberSpacing = 14*2
 questionLeftPadding = 25*2
+questionRightPadding = 35*2
 questionPromptEqualsSignSpacing = 15
 
 keyboardHeight = 432
@@ -288,7 +289,7 @@ createQuestion = (difficulty, level) ->
 	question.setSelected = (selected, animated) ->
 		if selected
 			time = if animated then 0.15 else 0
-			newQuestionWidth = Math.max(question.answerLayer.maxX + questionLeftPadding, questionWidthSelected)
+			newQuestionWidth = Math.max(question.answerLayer.maxX + questionRightPadding, questionWidthSelected)
 			
 			questionInterior.animate
 				properties: {x: -(newQuestionWidth - questionWidthUnselected) / 2}
@@ -318,7 +319,7 @@ createQuestion = (difficulty, level) ->
 				time: time
 		else
 			time = if animated then 0.1 else 0
-			newQuestionWidth = questionWidthUnselected
+			newQuestionWidth = Math.max(question.promptLayer.maxX + questionRightPadding, questionWidthUnselected)
 			
 			questionInterior.animate
 				properties: {x: 0}
@@ -615,6 +616,8 @@ createQuestion = (difficulty, level) ->
 			
 			question.ghostifyAnswer()
 		
+	question.setSelected false, false
+	
 	return question	
 
 #==========================================
