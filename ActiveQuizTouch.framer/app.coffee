@@ -22,6 +22,8 @@ levelRootLayer = new Layer
 	
 clip = (value, min, max) ->
 	Math.max(min, Math.min(max, value))
+	
+isRunningAsAppOnHomeScreen = window.navigator.standalone || false
 
 #==========================================
 # Style Stuffz
@@ -71,7 +73,12 @@ keyboardHeight = 432
 #==========================================
 # Points
 
+header = new Layer
+	y: if isRunningAsAppOnHomeScreen then 40 else 0
+	backgroundColor: ""
+
 pointsDisplay = new TextLayer
+	parent: header
 	color: whiteColor
 	fontSize: 13*2
 	fontFamily: fontFamily
@@ -79,6 +86,7 @@ pointsDisplay = new TextLayer
 	y: 15
 	
 pointsIcon = new Layer
+	parent: header
 	backgroundColor: pointColor
 	x: 145
 	y: 17
@@ -101,12 +109,14 @@ pauseTime = null # When set, contains the remaining number of milliseconds befor
 lastTimeUpdate = 0
 
 headerHairline = new Layer
+	parent: header
 	y: 32*2
 	backgroundColor: "rgba(255, 255, 255, 0.5)"
 	width: Screen.width
 	height: 1
 
 timeDisplay = new TextLayer
+	parent: header
 	color: whiteColor
 	fontFamily: fontFamily
 	fontSize: 13*2
@@ -114,6 +124,7 @@ timeDisplay = new TextLayer
 	text: ""
 	
 timeScaleBackground = new Layer
+	parent: header
 	backgroundColor: "rgba(49, 68, 83, 0.2)"
 	x: 122*2
 	y: 8*2
@@ -130,6 +141,7 @@ timeScaleForeground.props =
 	clip: false
 	
 levelDisplay = new TextLayer
+	parent: header
 	color: whiteColor
 	fontFamily: fontFamily
 	fontSize: 13*2
@@ -214,9 +226,9 @@ maximumNumberOfProblems = (levelNumber) ->
 
 questionScrollComponent = new ScrollComponent
 	parent: levelRootLayer
-	y: headerHairline.maxY
+	y: headerHairline.maxY + header.y
 	width: Screen.width
-	height: Screen.height - headerHairline.maxY
+	height: Screen.height - headerHairline.maxY - header.y
 	scrollHorizontal: false
 	contentInset:
 		top: 0
