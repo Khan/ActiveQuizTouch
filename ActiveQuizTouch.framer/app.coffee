@@ -507,7 +507,7 @@ createQuestion = (difficulty, level) ->
 		isLastAvailableQuestion = questions.length <= 1
 		effectiveNumberOfQuestionsRevealed = clip(
 			question.problem.questionsRevealed,
-			if isLastAvailableQuestion then 1 else 0, 
+			if isLastAvailableQuestion then 2 else 0, 
 			maximumNumberOfProblems(level) - (questions.length + completedQuestions.length)
 		)
 		
@@ -638,9 +638,7 @@ createQuestion = (difficulty, level) ->
 					questions.splice(questions.indexOf(question), 1)
 					completedQuestions.unshift(question)
 					question.isAnswered = true
-					
-					otherQuestion.updateQuestionsRevealed true for otherQuestion in questions
-					
+										
 					setSelectedQuestion null, true
 					
 					# Reveal new questions:
@@ -655,6 +653,8 @@ createQuestion = (difficulty, level) ->
 						addQuestion newQuestion, true
 						newQuestions.push(newQuestion)
 						
+					otherQuestion.updateQuestionsRevealed true for otherQuestion in questions
+
 					updateQuestionLayout true
 						
 					delay = 0
