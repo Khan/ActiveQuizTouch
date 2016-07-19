@@ -1097,7 +1097,14 @@ for column in [0..3]
 					unhighlight event, layer
 		else if column == 3 && row == 0
 			# Backspace
-			keyLabel.text = "bsp"
+			keyLabel.visible = false
+			icon = new Layer
+				parent: key
+				image: "images/backspace@3x.png"
+				width: 70.5
+				height: 43.5
+				x: Align.center
+				y: Align.center(55)
 			key.height = keyHeight * 2 - keySpacing
 			key.onTouchEnd (event, layer) ->
 				updatePendingNumber (answerBuffer) ->
